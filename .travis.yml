@@ -17,6 +17,6 @@ before_script:
 deploy:
     - echo "$VERSION"
     - ci/create_tarballs
-    - ci/upload.sh "target/tarballs/hurl-$VERSION-x86_64-linux.tar.gz"
+    - ci/upload.sh "$VERSION" "target/tarballs/hurl-$VERSION-x86_64-linux.tar.gz"
 
 
