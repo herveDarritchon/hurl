@@ -17,7 +17,7 @@ before_script:
 script:
     - cargo build i--release --verbose
     - cargo test --verbose
-    - export PATH=target/release:$PATH
+    - export PATH="$PWD/target/release:$PATH"
     - integration/integration.sh
 
 
