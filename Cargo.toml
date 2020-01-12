@@ -1,6 +1,6 @@
 [package]
 name = "hurl"
-version = "0.2.1"
+version = "0.2.3"
 authors = ["Fabrice Reix <fabrice.reix@gmail.com>"]
 edition = "2018"
 build = "build.rs"
