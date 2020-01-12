@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -e
+set -u
+
+OUTPUT_DIR="$1"
+RELEASE_DIR=$PWD/target/release
+VERSION=$(grep '^version' Cargo.toml | cut -f2 -d'"')
+PACKAGE_DIR="hurl-$VERSION"
+TARBALL_FILE="hurl-$VERSION-x86_64-linux.tar.gz"
+
+mkdir -p "$OUTPUT_DIR"
+echo create tarballs into "$OUTPUT_DIR"
+cd "$OUTPUT_DIR"
+
+rm -rf "$PACKAGE_DIR"
+mkdir "$PACKAGE_DIR"
+cp "$RELEASE_DIR/hurl" "$PACKAGE_DIR"
+cp "$RELEASE_DIR/hurlfmt" "$PACKAGE_DIR"
+tar cvfz "$TARBALL_FILE" "$PACKAGE_DIR"
+
+ARCHIVE_FILE="$OUTPUT_DIR/hurl-$VERSION.tar.gz"
+cd -
+git archive -o "$ARCHIVE_FILE" HEAD
+
+
