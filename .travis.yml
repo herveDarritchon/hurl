@@ -8,5 +8,5 @@ before_script:
     - python3 -V
     - sudo apt-get install python3-pip
     - pip3 install Flask
-    - python3 integration/server.py
+    - cd integration && python3 server.py
 
