@@ -16,11 +16,7 @@ before_script:
 
 deploy:
   provider: script
-  script:
-    - echo "VERSON=$VERSION"
-    - ci/check_tag
-    - ci/create_tarballs
-    - ci/upload.sh "$VERSION" "target/tarballs/hurl-$VERSION-x86_64-linux.tar.gz"
+  script: ci/deploy.sh
   skip_cleanup: true
   on:
     all_branch: true
