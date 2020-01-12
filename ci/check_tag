@@ -10,6 +10,6 @@ if [ "$TAG" != "$VERSION" ]; then
         echo "Tag '$TAG' does not match version '$VERSION'"
         exit 1
 fi
-
+echo tag matches version
 
 
