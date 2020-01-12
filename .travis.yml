@@ -2,3 +2,9 @@ language: rust
 rust:
     - stable
 
+before_script:
+    - which python3
+    - python3 -v
+    - pip3 install Flask
+    - python3 integration/server.py
+
