@@ -3,7 +3,7 @@ sudo: true
 rust:
     - stable
 
-#cache: cargo
+cache: cargo
 
 before_script:
     - which python3
