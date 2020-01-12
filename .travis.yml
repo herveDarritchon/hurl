@@ -14,4 +14,9 @@ before_script:
     - sleep 2
     - export VERSION=$(grep '^version' Cargo.toml | cut -f2 -d'"')
 
+deploy:
+    - echo "$VERSION"
+    - ci/create_tarballs
+    - ci/upload.sh "target/tarballs/hurl-$VERSION-x86_64-linux.tar.gz"
+
 
