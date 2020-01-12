@@ -15,9 +15,14 @@ before_script:
     - export VERSION=$(grep '^version' Cargo.toml | cut -f2 -d'"')
 
 deploy:
+  provider: script
+  script:
     - echo "$VERSION"
     - ci/check_tag
     - ci/create_tarballs
     - ci/upload.sh "$VERSION" "target/tarballs/hurl-$VERSION-x86_64-linux.tar.gz"
+  skip_cleanup: true
+  on:
+    all_branch: true
 
 
