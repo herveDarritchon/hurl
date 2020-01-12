@@ -1,0 +1,7 @@
+[1;31merror[0m: Assert - Inconsistent predicate type
+  --> tests/error_assert_invalid_predicate_type.hurl:4:21
+   |
+ 4 | header content-type equals 1
+   |                     ^^^^^^^^ predicate type inconsistent with value return by query
+   |
+

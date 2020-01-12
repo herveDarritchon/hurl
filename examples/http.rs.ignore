@@ -1,0 +1,30 @@
+use hurl::runner::http::{Client, ClientOptions, Header, Method, Request};
+
+// flask mock server
+// http/1.0 => does not return case-sensitive headers
+
+fn main() {
+    let client = Client::init(ClientOptions {});
+
+    let body = "param1=value1&param2=".to_string().into_bytes();
+    println!("{:?}", body);
+    println!("{:?}", String::from_utf8(body).unwrap());
+    let request = Request {
+        method: Method::Post,
+        url: "http://localhost:8000/form-params".to_string(),
+        headers: vec![
+            Header {
+                name: "Content-Type".to_string(),
+                value: "application/x-www-form-urlencoded".to_string(),
+            },
+            Header {
+                name: "Content-Length".to_string(),
+                value: "21".to_string(),
+            },
+        ],
+        body: "param1=value1&param2=".to_string().into_bytes(),
+    };
+    let response = client.execute(&request).unwrap();
+    println!("{:?}", response);
+    println!("{:?}", String::from_utf8(response.body).unwrap());
+}

@@ -1,0 +1,12 @@
+extern crate hurl;
+
+fn main() {
+    let contents = "\n # comment1\n\nGET http://google.fr".to_string();;
+    let mut parser = hurl::parser::core::Parser::init(contents.as_str());
+    let hurl_file = hurl::parser::parser::hurl_file(&mut parser);
+
+    match hurl_file {
+        Ok(hurl_file) => println!("{:#?}", hurl_file),
+        Err(e) => println!("Error {:#?}", e),
+    }
+}
