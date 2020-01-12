@@ -15,8 +15,9 @@ before_script:
     - export VERSION=$(grep '^version' Cargo.toml | cut -f2 -d'"')
 
 script:
-    - cargo build --verbose
+    - cargo build i--release --verbose
     - cargo test --verbose
+    - export PATH=target/release:$PATH
     - integration/integration.sh
 
 
