@@ -3,7 +3,7 @@
 set -e
 set -u
 
-ci/check_tag
+ci/check_tag "$VERSION"
 ci/create_tarballs
 ci/upload.sh "$VERSION" "target/tarballs/hurl-$VERSION-x86_64-linux.tar.gz"
 
