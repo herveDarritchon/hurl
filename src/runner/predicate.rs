@@ -119,6 +119,8 @@ fn test_predicate() {
 
 impl PredicateFunc {
     pub fn eval(self, variables: &HashMap<String, String>, value: Value) -> Result<(), Error> {
+//        eprintln!(">>> actual={:?}", value);
+//        eprintln!(">>> predicate={:#?}", self.clone());
         let source_info = self.source_info;
         return match (self.value, value.clone()) {
 
@@ -209,6 +211,36 @@ impl PredicateFunc {
             (PredicateFuncValue::FirstEqualBool { value: expected, .. }, Value::List(values)) => {
                 match values.get(0) {
                     Some(Value::Bool(actual)) => {
+                        if *actual == expected {
+                            Ok(())
+                        } else {
+                            Err(Error { source_info, inner: RunnerError::PredicateValue(value), assert: false })
+                        }
+                    }
+                    _ => return Err(Error { source_info, inner: RunnerError::PredicateType, assert: false })
+                }
+            }
+
+            // firstEquals String
+            (PredicateFuncValue::FirstEqualString { value: expected, .. }, Value::List(values)) => {
+                let expected = expected.eval(variables)?;
+                match values.get(0) {
+                    Some(Value::String(actual)) => {
+                        if *actual == expected {
+                            Ok(())
+                        } else {
+                            Err(Error { source_info, inner: RunnerError::PredicateValue(value), assert: false })
+                        }
+                    }
+                    _ => return Err(Error { source_info, inner: RunnerError::PredicateType, assert: false })
+                }
+            }
+
+            // firstEquals Int
+            (PredicateFuncValue::FirstEqualInt { value: expected, .. }, Value::List(values)) => {
+
+                match values.get(0) {
+                    Some(Value::Integer(actual)) => {
                         if *actual == expected {
                             Ok(())
                         } else {

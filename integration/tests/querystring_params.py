@@ -5,4 +5,5 @@ from flask import request
 def querystring_params():
     assert request.args.get('param1') == 'value1'
     assert request.args.get('param2') == ''
+    assert request.args.get('param3') == 'a=b'
     return ''

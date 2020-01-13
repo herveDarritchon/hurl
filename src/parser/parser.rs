@@ -1355,6 +1355,7 @@ pub fn assert(p: &mut Parser) -> ParseResult<'static, Assert> {
                 match predicate0.clone().predicate_func.value {
                     PredicateFuncValue::EqualBool { space0, value } => PredicateFuncValue::FirstEqualBool { space0, value },
                     PredicateFuncValue::EqualInt { space0, value } => PredicateFuncValue::FirstEqualInt { space0, value },
+                    PredicateFuncValue::EqualString { space0, value } => PredicateFuncValue::FirstEqualString { space0, value },
                     PredicateFuncValue::CountEqual { space0, value } => PredicateFuncValue::FirstCountEqual { space0, value },
                     _ => predicate0.clone().predicate_func.value
                 }

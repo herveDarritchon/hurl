@@ -26,14 +26,15 @@ impl Textable for Response {
         }
         s.push_str("\n");
 
-        let limit_body = 100; // TODO should be explicitly pass as a command-line argument
+        // shoudl use number of char, not a number of bytes!!
+        let limit_body = 200; // TODO should be explicitly pass as a command-line argument
         let body = body_text(self.clone().body, get_header_value(self.clone().headers, "content-type"));
-        let body = if body.len() < limit_body {
-            body
-        } else {
-            format!("{}...", &body[0..limit_body])
-        };
-        s.push_str(body.as_str());
+//        let body = if body.len() < limit_body - 1 {
+//            body
+//        } else {
+//            format!("{}...", &body[0..limit_body])
+//        };
+        s.push_str(substring(body.as_str(), 0, limit_body));
         return s;
     }
 }
@@ -71,19 +72,73 @@ impl Textable for Header {
 
 
 fn body_text(bytes: Vec<u8>, content_type: Option<String>) -> String {
-    match content_type {
+    return match content_type {
         Some(content_type) =>
-            if vec!["application/json", "text/html;charset=utf-8", "text", "application/x-www-form-urlencoded", "text/html"].contains(&content_type.as_str()) {
-                return String::from_utf8(bytes).unwrap();
-            } else if &content_type == "text/html; charset=utf-8" {
-                match String::from_utf8(bytes.clone()) {
-                    Ok(s) => return s,
-                    _ => {}
-                };
+            if is_text(content_type.as_str()) {
+                String::from_utf8(bytes).unwrap()
+            } else {
+                format!("{:?}", bytes)
             }
-        _ => {}
+        _ => {
+            if bytes.is_empty() {
+                String::from("")
+            } else {
+                format!("{:?}", bytes)
+            }
+        }
+    };
+}
+
+fn is_text(content_type: &str) -> bool {
+    for s in vec![
+        "application/json",
+        "text/html",
+        "charset=utf-8",
+        "application/x-www-form-urlencoded"
+    ] {
+        if content_type.contains(s) {
+            return true;
+        }
     }
-    return if bytes.is_empty() { String::from("") } else { format!("{:?}", bytes) };
+    return false;
+}
+
+#[test]
+fn test_is_text() {
+    assert_eq!(is_text("application/json"), true);
+    assert_eq!(is_text("application/json;charset=utf-8"), true);
 }
 
 
+// substring implementation
+
+fn substring(s: &str, start: usize, len: usize) -> &str {
+    let mut char_pos = 0;
+    let mut byte_start = 0;
+    let mut it = s.chars();
+    loop {
+        if char_pos == start { break; }
+        if let Some(c) = it.next() {
+            char_pos += 1;
+            byte_start += c.len_utf8();
+        } else { break; }
+    }
+    char_pos = 0;
+    let mut byte_end = byte_start;
+    loop {
+        if char_pos == len { break; }
+        if let Some(c) = it.next() {
+            char_pos += 1;
+            byte_end += c.len_utf8();
+        } else { break; }
+    }
+    &s[byte_start..byte_end]
+}
+
+
+#[test]
+fn test_substring() {
+    assert_eq!(substring("", 0, 0), "");
+    assert_eq!(substring("hello world!", 0, 5), "hello");
+    assert_eq!(substring("hello world!", 0, 15), "hello world!");
+}

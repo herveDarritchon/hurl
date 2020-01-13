@@ -2,6 +2,6 @@
   --> tests/error_invalid_jsonpath.hurl:4:10
    |
  4 | jsonpath $$ equals false
-   |          ^^ the jsonpath xpression is not valid
+   |          ^^ the jsonpath expression is not valid
    |
 

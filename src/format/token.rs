@@ -580,6 +580,11 @@ impl Tokenizable for PredicateFuncValue {
                 add_tokens(&mut tokens, space0.tokenize());
                 tokens.push(Token::Number(value.to_string()));
             }
+            PredicateFuncValue::FirstEqualString { space0, value } => {
+                tokens.push(Token::PredicateType(String::from("equals")));
+                add_tokens(&mut tokens, space0.tokenize());
+                add_tokens(&mut tokens, value.tokenize());
+            }
             PredicateFuncValue::FirstCountEqual { space0, value } => {
                 tokens.push(Token::PredicateType(String::from("countEquals")));
                 add_tokens(&mut tokens, space0.tokenize());

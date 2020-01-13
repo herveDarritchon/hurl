@@ -446,6 +446,11 @@ impl Htmlable for PredicateFuncValue {
                 buffer.push_str(space0.to_html().as_str());
                 buffer.push_str(format!("<span class=\"number\">{}</span>", value).as_str());
             }
+            PredicateFuncValue::FirstEqualString { space0, value } => {
+                buffer.push_str("<span class=\"predicate-type\">equals</span>");
+                buffer.push_str(space0.to_html().as_str());
+                buffer.push_str(format!("<span class=\"string\">{}</span>", value.to_html()).as_str());
+            }
             PredicateFuncValue::FirstCountEqual { space0, value } => {
                 buffer.push_str("<span class=\"predicate-type\">countEquals</span>");
                 buffer.push_str(space0.to_html().as_str());

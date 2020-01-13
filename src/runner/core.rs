@@ -86,7 +86,7 @@ impl FormatError for Error {
             RunnerError::AssertHeaderValueError {actual}=> format!("actual value is {}", actual),
             RunnerError::QueryInvalidJson {..}=> format!("The http response is not a valid json"),
             RunnerError::QueryInvalidUtf8 {..}=> format!("The http response is not a valid utf8 string"),
-            RunnerError::QueryInvalidJsonpathExpression {..} => format!("the jsonpath xpression is not valid"),
+            RunnerError::QueryInvalidJsonpathExpression {..} => format!("the jsonpath expression is not valid"),
             RunnerError::PredicateType { .. } => format!("predicate type inconsistent with value return by query"),
         };
     }

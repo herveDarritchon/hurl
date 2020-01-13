@@ -358,6 +358,10 @@ pub enum PredicateFuncValue {
         space0: Whitespace,
         value: bool,
     },
+    FirstEqualString {
+        space0: Whitespace,
+        value: HurlTemplate,
+    },
     FirstCountEqual {
         space0: Whitespace,
         value: u64,
