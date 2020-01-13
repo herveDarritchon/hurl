@@ -163,8 +163,27 @@ impl Entry {
 
         // update cookies
         for cookie in http_response.cookies() {
-            if verbose { eprintln!("[DEBUG] cookie {}={}", cookie.name, cookie.value); }
-            cookies.insert(cookie.clone().name, cookie);
+            if verbose {
+                let max_age = match cookie.max_age {
+                    Some(value) => format!(";Max-Age={}", value),
+                    None => String::from("")
+                };
+                eprintln!("[DEBUG] cookie {}={}{}", cookie.name, cookie.value, max_age);
+            }
+
+
+            match cookie.max_age {
+                Some(0) => {
+                    //eprintln!(">>> cookies={:?}", cookies);
+                    cookies.remove(cookie.clone().name.as_str());
+                    //eprintln!(">>> cookies={:?}", cookies);
+                }
+                _ => {
+                    cookies.insert(cookie.clone().name, cookie);
+                }
+            }
+
+
         }
 
 

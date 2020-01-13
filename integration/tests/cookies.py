@@ -26,3 +26,14 @@ def set_cookie2_value1():
     resp.set_cookie('cookie2', 'value1')
     return resp
 
+
+@app.route("/cookies/delete-cookie2")
+def delete_cookie2():
+    resp = make_response()
+    resp.set_cookie('cookie2', 'value1', max_age=0)
+    return resp
+
+@app.route("/cookies/assert-that-cookie2-is-not-set")
+def assert_that_cookie2_is_not_set():
+    assert'cookie2' not in request.cookies
+    return ''

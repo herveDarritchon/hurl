@@ -23,5 +23,6 @@ jsonpath = "0.1.1"
 url = "2.1.0"
 sxd-document = "0.3.2"
 serde = "1.0.104"
-
+percent-encoding = "2.1.0"
+cookie = "0.12.0"
 

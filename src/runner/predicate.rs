@@ -152,11 +152,13 @@ impl PredicateFunc {
 
             // equals string
             (PredicateFuncValue::EqualString { value: template, .. }, Value::String(actual)) => {
-                let value = template.eval(variables)?;
-                if actual == value {
+                let expected = template.eval(variables)?;
+//                eprintln!(">> expected={}", expected);
+//                eprintln!(">>   actual={}", actual);
+                if actual == expected {
                     return Ok(());
                 } else {
-                    return Err(Error { source_info, inner: RunnerError::PredicateValue(Value::String(value)), assert: false });
+                    return Err(Error { source_info, inner: RunnerError::PredicateValue(Value::String(expected)), assert: false });
                 }
             }
 

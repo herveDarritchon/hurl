@@ -12,6 +12,20 @@ use super::http;
 //use super::log::*;
 use super::super::core::ast::*;
 
+use percent_encoding::{utf8_percent_encode, AsciiSet, CONTROLS};
+
+const FRAGMENT: &AsciiSet = &CONTROLS
+    .add(b' ')
+    .add(b'"')
+    .add(b':')
+    .add(b'/')
+    .add(b'?')
+    .add(b'<')
+    .add(b'>')
+    .add(b'+')
+    .add(b'`');
+
+
 fn has_header(headers: &Vec<http::Header>, name: String) -> bool {
     for header in headers {
         if header.name == name.to_string() {
@@ -47,8 +61,10 @@ impl Request {
             for param in self.clone().querystring_params() {
                 let name = param.name.value;
                 let value = param.value.eval(variables)?;
-                querystring_params.push(format!("{}={}", name, value));
+                let encoded =  utf8_percent_encode(value.as_str(), FRAGMENT).to_string();
+                querystring_params.push(format!("{}={}", name, encoded));
             }
+
 
             url.querystring = Some(querystring_params.join("&"));
         }
@@ -80,6 +96,7 @@ impl Request {
             cookies.insert(cookie.clone().name.value, http::Cookie {
                 name: cookie.clone().name.value,
                 value: cookie.clone().value.value,
+                max_age: None
             });
         }
         if !cookies.is_empty() {

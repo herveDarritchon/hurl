@@ -2,6 +2,20 @@ extern crate reqwest;
 use serde::{Deserialize, Serialize};
 
 use super::core::RunnerError;
+use percent_encoding::{utf8_percent_encode, AsciiSet, CONTROLS};
+use cookie;
+
+
+const FRAGMENT: &AsciiSet = &CONTROLS
+    .add(b' ')
+    .add(b'"')
+    .add(b':')
+    .add(b'/')
+    .add(b'<')
+    .add(b'>')
+    .add(b'+')
+    .add(b'=')
+    .add(b'`');
 
 
 pub struct Client {
@@ -89,6 +103,7 @@ pub struct Header {
 pub struct Cookie {
     pub name: String,
     pub value: String,
+    pub max_age: Option<i64>,
 }
 
 impl Cookie {
@@ -130,7 +145,8 @@ fn add_query_param(url: String, param: Param) -> String {
     } else {
         s.push_str("?")
     }
-    s.push_str(format!("{}={}", param.name, param.value).as_str());
+    let encoded = utf8_percent_encode(param.value.as_str(), FRAGMENT).to_string();
+    s.push_str(format!("{}={}", param.name, encoded).as_str());
     return s;
 }
 
@@ -154,9 +170,23 @@ fn test_add_query_param() {
             value: String::from(""),
         },
     );
+    let url = add_query_param(
+        url,
+        Param {
+            name: String::from("param3"),
+            value: String::from("a b"),
+        },
+    );
+    let url = add_query_param(
+        url,
+        Param {
+            name: String::from("param4"),
+            value: String::from("http://"),
+        },
+    );
     assert_eq!(
         url,
-        String::from("http://localhost:5000/querystring-params?param1=value1&param2=")
+        String::from("http://localhost:5000/querystring-params?param1=value1&param2=&param3=a%20b&param4=http%3A%2F%2F")
     );
 }
 
@@ -237,11 +267,24 @@ impl Response {
         let mut cookies = vec![];
         for Header { name, value } in self.clone().headers {
             if name.to_lowercase() == "set-cookie" {
-                let fields = value.split(";").collect::<Vec<&str>>();
-                let name_value = fields.get(0).unwrap().split("=").collect::<Vec<&str>>();
-                let name = name_value.get(0).unwrap().to_string();
-                let value = name_value.get(1).unwrap().to_string();
-                cookies.push(Cookie { name, value });
+
+
+
+                let c = cookie::Cookie::parse(value.as_str()).unwrap();
+//                eprintln!(">>> parse set-cookie header");
+//                eprintln!(">>> c = {:?}", c);
+//
+//                let fields = value.split(";").collect::<Vec<&str>>();
+//                let name_value = fields.get(0).unwrap().split("=").collect::<Vec<&str>>();
+//                let name = name_value.get(0).unwrap().to_string();
+//                let value = name_value.get(1).unwrap().to_string();
+                let name = c.name().to_string();
+                let value = c.value().to_string();
+                let max_age= match c.max_age() {
+                    None => None,
+                    Some(d) => Some(d.num_seconds())
+                };
+                cookies.push(Cookie { name, value, max_age });
             }
         }
         return cookies;
@@ -327,6 +370,7 @@ impl Client {
             .execute(req) {
             Ok(mut resp) => {
                 let mut headers = vec![];
+                //eprintln!(">>> response headers {:?}", resp.headers().clone());
                 for (name, value) in resp.headers() {
                     headers.push(Header {
                         name: name.as_str().to_string(),
@@ -423,6 +467,7 @@ fn test_cookie_header() {
         Header::from_cookies(vec![Cookie {
             name: String::from("cookie1"),
             value: String::from("value1"),
+            max_age: None
         }]),
         Header {
             name: String::from("Cookie"),
@@ -431,8 +476,8 @@ fn test_cookie_header() {
     );
     assert_eq!(
         Header::from_cookies(vec![
-            Cookie { name: String::from("cookie1"), value: String::from("value1") },
-            Cookie { name: String::from("cookie2"), value: String::from("value2") }
+            Cookie { name: String::from("cookie1"), value: String::from("value1"), max_age: None },
+            Cookie { name: String::from("cookie2"), value: String::from("value2"), max_age: None }
         ]),
         Header {
             name: String::from("Cookie"),
