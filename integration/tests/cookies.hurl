@@ -1,22 +1,31 @@
-GET http://localhost:8000/cookies/send-cookie1-value1
+# Request Cookie
+
+GET http://localhost:8000/cookies/set-request-cookie1-valueA
 [Cookies]
-cookie1: value1
+cookie1: valueA
+HTTP/1.0 200
+
+GET http://localhost:8000/cookies/assert-that-cookie1-is-not-in-session
 HTTP/1.0 200
 
 
-GET http://localhost:8000/cookies/set-cookie2-value1
+
+# Session Cookie
+
+GET http://localhost:8000/cookies/set-session-cookie2-valueA
 HTTP/1.0 200
 [Asserts]
-cookie cookie2 equals "value1"
+cookie cookie2 equals "valueA"
 
-
-GET http://localhost:8000/cookies/send-cookie2-value1
+GET http://localhost:8000/cookies/assert-that-cookie2-is-valueA
 HTTP/1.0 200
 
-
-GET http://localhost:8000/cookies/send-cookie2-value2
+GET http://localhost:8000/cookies/set-request-cookie2-valueB
 [Cookies]
-cookie2: value2
+cookie2: valueB
+HTTP/1.0 200
+
+GET http://localhost:8000/cookies/assert-that-cookie2-is-valueA
 HTTP/1.0 200
 
 GET http://localhost:8000/cookies/delete-cookie2
@@ -24,5 +33,11 @@ HTTP/1.0 200
 [Asserts]
 header Set-Cookie contains "Max-Age=0"   # TODO replace by cookie query
 
-GET http://localhost:8000/cookies/assert-that-cookie2-is-not-set
+GET http://localhost:8000/cookies/assert-that-cookie2-is-not-in-session
 HTTP/1.0 200
+
+
+
+
+
+
