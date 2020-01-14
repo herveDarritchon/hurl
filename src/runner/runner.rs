@@ -35,7 +35,7 @@ pub fn run(
 ) -> HurlResult {
     let mut entries = vec![];
     let mut variables = HashMap::new();
-    let mut cookies = HashMap::new();
+    let mut all_cookies = HashMap::new();
     for (key, value) in init_variables {
         variables.insert(key.to_string(), value.to_string());
     }
@@ -43,7 +43,7 @@ pub fn run(
     //let mut variables = variables;
     for entry in hurl_file.entries {
         // eprintln!(">> entry");
-        let entry_result = entry.eval(&http_client, &mut variables, &mut cookies, verbose, context_dir);
+        let entry_result = entry.eval(&http_client, &mut variables, &mut all_cookies, verbose, context_dir);
         entries.push(entry_result.clone());
         for e in entry_result.errors.clone() {
             let error = format::error::Error {
@@ -67,6 +67,10 @@ pub fn run(
 //        if !assert_errors.is_empty() {
 //            break;
 //        }
+
+
+        //eprintln!(">>> all cookies {:#?}", all_cookies);
+
     }
     return HurlResult {
         filename,

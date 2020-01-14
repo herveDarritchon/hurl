@@ -39,7 +39,7 @@ fn has_header(headers: &Vec<http::Header>, name: String) -> bool {
 impl Request {
     pub fn eval(self,
                 variables: &HashMap<String, String>,
-                current_cookies: &HashMap<String, http::Cookie>,
+                all_cookies: &HashMap<http::Domain, HashMap<http::Name, http::Cookie>>,
                 context_dir: &str,
     )
                 -> Result<http::Request, Error> {
@@ -90,7 +90,12 @@ impl Request {
         }
 
         // add cookies
-        let mut cookies = current_cookies.clone();
+        let host = url.host.as_str();
+        let mut cookies: HashMap<http::Name, http::Cookie> = match all_cookies.get(host) {
+            None => HashMap::new(),
+            Some(v) => v.clone(),
+        };
+
         // TODO cookie from header
         for cookie in self.clone().cookies() {
             cookies.insert(cookie.clone().name.value, http::Cookie {
@@ -150,6 +155,8 @@ impl Request {
         };
         return Ok(request);
     }
+
+
 }
 // endregion
 

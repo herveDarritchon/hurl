@@ -11,7 +11,7 @@ use hurl::core::ast::HurlString;
 // can be used for debugging
 #[test]
 fn test_hurl_file() {
-    let filename = "integration/tests/hello.hurl";
+    let filename = "integration/tests/cookies.hurl";
     //let filename = "/mnt/secure/repos/work/myshop/integration/src/main/hurl-generated/pcm/pcm-jdd-open-up-150go.hurl";
     let content = std::fs::read_to_string(filename).expect("Something went wrong reading the file");
     let mut parser = hurl::parser::core::Parser::init(content.as_str());

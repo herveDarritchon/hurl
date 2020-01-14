@@ -6,6 +6,9 @@ use percent_encoding::{utf8_percent_encode, AsciiSet, CONTROLS};
 use cookie;
 
 
+pub type Domain = String;
+pub type Name = String;
+
 const FRAGMENT: &AsciiSet = &CONTROLS
     .add(b' ')
     .add(b'"')
@@ -53,6 +56,12 @@ impl Method {
             Method::Options => reqwest::Method::OPTIONS,
             Method::Trace => reqwest::Method::TRACE,
         };
+    }
+}
+
+impl Request {
+    pub fn host(self) -> String {
+        return self.url.host;
     }
 }
 
@@ -108,7 +117,11 @@ pub struct Cookie {
 
 impl Cookie {
     pub fn to_string(&self) -> String {
-        return format!("{}={}", self.name, self.value);
+        let max_age = match self.max_age {
+            None => String::from(""),
+            Some(v) => format!(";Max-Age:{}", v)
+        };
+        return format!("{}={}{}", self.name, self.value, max_age);
     }
 }
 
@@ -308,7 +321,7 @@ impl Client {
             .danger_accept_invalid_hostnames(options.insecure)
             .danger_accept_invalid_certs(options.insecure)
 //.http1_title_case_headers()
-            .cookie_store(true);
+            .cookie_store(false);
         return Client {
             inner_client: client_builder.build().unwrap(),
             _options: options,
@@ -327,6 +340,10 @@ impl Client {
                 reqwest::header::HeaderValue::from_str(header.value.as_str()).unwrap(),
             );
         }
+
+
+        // clear cookies from client
+        // use only yours!
 
 
 //        let url = if request.querystring_params.is_empty() {
@@ -354,6 +371,7 @@ impl Client {
 //        };
 //        let client = client_builder.build().unwrap();
         let client = &self.clone().inner_client;
+
 
         let req = client
             .request(
@@ -409,6 +427,9 @@ impl Client {
             }
         }
     }
+
+
+
 }
 
 impl Header {

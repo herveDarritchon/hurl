@@ -20,6 +20,10 @@ cookie cookie2 equals "valueA"
 GET http://localhost:8000/cookies/assert-that-cookie2-is-valueA
 HTTP/1.0 200
 
+GET http://127.0.0.1:8000/cookies/assert-that-cookie2-is-not-in-session
+HTTP/1.0 200
+
+
 GET http://localhost:8000/cookies/set-request-cookie2-valueB
 [Cookies]
 cookie2: valueB

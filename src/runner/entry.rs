@@ -68,18 +68,24 @@ pub struct EntryResult {
 //    }
 //}
 
+// cookies
+// for all domains
+
+// but only pass cookies for one domain for the request
+
+
 
 impl Entry {
     pub fn eval(self, http_client: &http::Client,
                 variables: &mut HashMap<String, String>,
-                cookies: &mut HashMap<String, http::Cookie>,
+                all_cookies: &mut HashMap<http::Domain, HashMap<http::Name, http::Cookie>>,
                 verbose: bool,
                 context_dir: &str,
     ) -> EntryResult {
 
         //let mut entry_log_builder = EntryLogBuilder::init();
 
-        let http_request = match self.clone().request.eval(variables, cookies, context_dir) {
+        let http_request = match self.clone().request.eval(variables, all_cookies, context_dir) {
             Ok(r) => r,
             Err(error) => {
                 return EntryResult {
@@ -162,20 +168,29 @@ impl Entry {
 //        }
 
         // update cookies
-        for cookie in http_response.cookies() {
-            if verbose {
-                let max_age = match cookie.max_age {
-                    Some(value) => format!(";Max-Age={}", value),
-                    None => String::from("")
-                };
-                eprintln!("[DEBUG] cookie {}={}{}", cookie.name, cookie.value, max_age);
-            }
+        // for the domain
+        let host = http_request.clone().host();
+        let mut cookies: HashMap<http::Name, http::Cookie> = match all_cookies.get(&host) {
+            None => HashMap::new(),
+            Some(v) =>  v.clone(),
+        };
 
+
+
+        for cookie in http_response.cookies() {
+
+//            if verbose {
+//                let max_age = match cookie.max_age {
+//                    Some(value) => format!(";Max-Age={}", value),
+//                    None => String::from("")
+//                };
+//                //eprintln!("[DEBUG] cookie {}={}{}", cookie.name, cookie.value, max_age);
+//            }
 
             match cookie.max_age {
                 Some(0) => {
-                    //eprintln!(">>> cookies={:?}", cookies);
-                    cookies.remove(cookie.clone().name.as_str());
+
+                   cookies.remove(cookie.clone().name.as_str());
                     //eprintln!(">>> cookies={:?}", cookies);
                 }
                 _ => {
@@ -183,9 +198,15 @@ impl Entry {
                 }
             }
 
-
+        }
+        if verbose {
+            eprintln!("[DEBUG] Cookies for {}", host);
+            for (_, cookie) in cookies.clone() {
+                eprintln!("[DEBUG] {}", cookie.to_string());
+            }
         }
 
+        all_cookies.insert(host, cookies.clone());
 
         return EntryResult {
             request: Some(http_request),

@@ -107,12 +107,12 @@ fn test_send_cookie() {
             scheme: "http".to_string(),
             host: "localhost".to_string(),
             port: Some(8000),
-            path: "/cookies/send-cookie1-value1".to_string(),
+            path: "/cookies/set-request-cookie1-valueA".to_string(),
             querystring: None
         }, //"http://localhost:8000/send-cookie".to_string(),
         headers: vec![Header {
             name: "Cookie".to_string(),
-            value: "cookie1=value1;".to_string(),
+            value: "cookie1=valueA;".to_string(),
         }],
         body: vec![],
     };
@@ -122,7 +122,8 @@ fn test_send_cookie() {
     let _client = Client::init(default_client_options());
     let _cookie_header = Header::from_cookies(vec![Cookie {
         name: "Cookie1".to_string(),
-        value: "value1;".to_string(),
+        value: "valueA;".to_string(),
+        max_age: None
     }]);
     /*
     let request = Request {
@@ -171,12 +172,8 @@ fn test_querystring_param() {
             host: "localhost".to_string(),
             port: Some(8000),
             path: "/querystring-params".to_string(),
-            querystring: Some(String::from("param1=value1&param2"))
+            querystring: Some(String::from("param1=value1&param2&param3=a%3db"))
         },
-        //querystring_params: vec![
-        //    Param { name: String::from("param1"), value: String::from("value1") },
-        //    Param { name: String::from("param2"), value: String::from("") },
-        //],
         headers: vec![],
         body: vec![],
     };
