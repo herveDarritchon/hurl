@@ -6,27 +6,32 @@ use std::collections::HashMap;
 
 #[cfg(test)]
 use crate::core::core::SourceInfo;
-
 use super::core::{Error, RunnerError};
-use super::http;
+//use super::core::*;
+
 //use super::log::*;
 use super::super::core::ast::*;
+use crate::http;
+
 
 use percent_encoding::{utf8_percent_encode, AsciiSet, CONTROLS};
+
+
+
 
 const FRAGMENT: &AsciiSet = &CONTROLS
     .add(b' ')
     .add(b'"')
     .add(b':')
     .add(b'/')
-    .add(b'?')
     .add(b'<')
     .add(b'>')
     .add(b'+')
+    .add(b'=')
     .add(b'`');
 
 
-fn has_header(headers: &Vec<http::Header>, name: String) -> bool {
+fn has_header(headers: &Vec<http::core::Header>, name: String) -> bool {
     for header in headers {
         if header.name == name.to_string() {
             return true;
@@ -39,10 +44,10 @@ fn has_header(headers: &Vec<http::Header>, name: String) -> bool {
 impl Request {
     pub fn eval(self,
                 variables: &HashMap<String, String>,
-                all_cookies: &HashMap<http::Domain, HashMap<http::Name, http::Cookie>>,
+                all_cookies: &HashMap<http::cookie::Domain, HashMap<http::cookie::Name, http::cookie::Cookie>>,
                 context_dir: &str,
     )
-                -> Result<http::Request, Error> {
+                -> Result<http::request::Request, Error> {
 
 
         //
@@ -76,7 +81,7 @@ impl Request {
             (String::from("User-Agent"), user_agent.clone()),
             (String::from("Host"), String::from(url.clone().host))
         ];
-        let mut headers: Vec<http::Header> = vec![];
+        let mut headers: Vec<http::core::Header> = vec![];
         for header in self.clone().headers {
             headers.push(header.eval(variables)?);
         }
@@ -85,32 +90,32 @@ impl Request {
         // add default headers if not present
         for (name, value) in default_headers {
             if !has_header(&headers, name.clone()) {
-                headers.push(http::Header { name, value });
+                headers.push(http::core::Header { name, value });
             }
         }
 
         // add cookies
         let host = url.host.as_str();
-        let mut cookies: HashMap<http::Name, http::Cookie> = match all_cookies.get(host) {
+        let mut cookies: HashMap<http::cookie::Name, http::cookie::Cookie> = match all_cookies.get(host) {
             None => HashMap::new(),
             Some(v) => v.clone(),
         };
 
         // TODO cookie from header
         for cookie in self.clone().cookies() {
-            cookies.insert(cookie.clone().name.value, http::Cookie {
+          let cookie = http::cookie::Cookie {
                 name: cookie.clone().name.value,
                 value: cookie.clone().value.value,
-                max_age: None
-            });
+                max_age: None,
+                domain: None
+            };
+            headers.push(cookie.to_header());
         }
-        if !cookies.is_empty() {
-            headers.push(http::Header::from_cookies(cookies.values().map(|c| c.clone()).collect()));
-        }
+
 
 
         if !self.clone().form_params().is_empty() {
-            headers.push(http::Header {
+            headers.push(http::core::Header {
                 name: String::from("Content-Type"),
                 value: String::from("application/x-www-form-urlencoded"),
             });
@@ -134,20 +139,20 @@ impl Request {
                     for param in self.clone().form_params() {
                         let name = param.name.value;
                         let value = param.value.eval(variables)?;
-                        params.push(http::Param {
+                        params.push(http::core::Param {
                             name,
                             value,
                         });
                     }
 
-                    http::encode_form_params(params)
+                    http::core::encode_form_params(params)
                 } else {
                     vec![]
                 }
             }
         };
 
-        let request = http::Request {
+        let request = http::request::Request {
             method: self.method.eval(),
             url,
             headers,
@@ -162,25 +167,25 @@ impl Request {
 
 
 impl Header {
-    pub fn eval(self, variables: &HashMap<String, String>) -> Result<http::Header, Error> {
+    pub fn eval(self, variables: &HashMap<String, String>) -> Result<http::core::Header, Error> {
         let name = self.name.value;
         let value = self.value.eval(variables)?;
-        return Ok(http::Header { name, value });
+        return Ok(http::core::Header { name, value });
     }
 }
 
 // region method
 impl Method {
-    fn eval(self) -> http::Method {
+    fn eval(self) -> http::request::Method {
         return match self {
-            Method::Get => http::Method::Get,
-            Method::Head => http::Method::Head,
-            Method::Post => http::Method::Post,
-            Method::Put => http::Method::Put,
-            Method::Delete => http::Method::Delete,
-            Method::Connect => http::Method::Connect,
-            Method::Options => http::Method::Options,
-            Method::Trace => http::Method::Trace,
+            Method::Get => http::request::Method::Get,
+            Method::Head => http::request::Method::Head,
+            Method::Post => http::request::Method::Post,
+            Method::Put => http::request::Method::Put,
+            Method::Delete => http::request::Method::Delete,
+            Method::Connect => http::request::Method::Connect,
+            Method::Options => http::request::Method::Options,
+            Method::Trace => http::request::Method::Trace,
         };
     }
 }
@@ -329,7 +334,7 @@ pub fn test_hello_request() {
     let mut variables = HashMap::new();
     let cookies = HashMap::new();
     variables.insert(String::from("base_url"), String::from("http://localhost:8000"));
-    assert_eq!(hello_request().eval(&variables, &cookies, "current_dir").unwrap(), http::hello_http_request());
+    assert_eq!(hello_request().eval(&variables, &cookies, "current_dir").unwrap(), http::request::hello_http_request());
 }
 
 #[test]
@@ -337,23 +342,23 @@ pub fn test_query_request() {
     let mut variables = HashMap::new();
     let cookies = HashMap::new();
     variables.insert(String::from("param1"), String::from("value1"));
-    assert_eq!(query_request().eval(&variables, &cookies, "current_dir").unwrap(), http::query_http_request());
+    assert_eq!(query_request().eval(&variables, &cookies, "current_dir").unwrap(), http::request::query_http_request());
 }
 
 
-pub fn split_url(url: String) -> (String, Vec<http::Param>) {
+pub fn split_url(url: String) -> (String, Vec<http::core::Param>) {
     return match url.find('?') {
         None => (url, vec![]),
         Some(index) => {
             let (url, params) = url.split_at(index);
             //println!("params={:?}", params);
-            let params: Vec<http::Param> = params[1..].split('&')
+            let params: Vec<http::core::Param> = params[1..].split('&')
                 .map(|s| {
                     return match s.find('=') {
-                        None => http::Param { name: s.to_string(), value: String::from("") },
+                        None => http::core::Param { name: s.to_string(), value: String::from("") },
                         Some(index) => {
                             let (name, value) = s.split_at(index);
-                            return http::Param { name: name.to_string(), value: value[1..].to_string() };
+                            return http::core::Param { name: name.to_string(), value: value[1..].to_string() };
                         }
                     };
                 })
@@ -372,17 +377,17 @@ pub fn test_split_url() {
     );
     assert_eq!(
         split_url(String::from("http://localhost:8000/hello?param1=value1")),
-        (String::from("http://localhost:8000/hello"), vec![http::Param { name: String::from("param1"), value: String::from("value1") }])
+        (String::from("http://localhost:8000/hello"), vec![http::core::Param { name: String::from("param1"), value: String::from("value1") }])
     );
 }
 
 // region url
 
 
-pub fn eval_url(s: String) -> Result<http::Url, RunnerError> {
+pub fn eval_url(s: String) -> Result<http::core::Url, RunnerError> {
     return match url::Url::parse(s.as_str()) {
         Err(_) => Err(RunnerError::InvalidURL(s)),
-        Ok(u) => Ok(http::Url {
+        Ok(u) => Ok(http::core::Url {
             scheme: u.scheme().to_string(),
             host: u.host_str().unwrap().to_string(),
             port: u.port(),

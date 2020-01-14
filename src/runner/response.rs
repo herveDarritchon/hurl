@@ -7,7 +7,7 @@ use crate::runner::core::RunnerError;
 use crate::core::core::SourceInfo;
 
 use super::core::Error;
-use super::http;
+//use super::http;
 use super::super::core::ast::*;
 
 #[cfg(test)]
@@ -15,6 +15,8 @@ use self::super::assert;
 use self::super::assert::AssertResult;
 #[cfg(test)]
 use self::super::capture;
+
+use crate::http;
 use crate::runner::text::Textable;
 
 //#[cfg(test)]
@@ -46,7 +48,7 @@ impl Response {
 //    }
 
     //pub fn eval_asserts(self, _variables: &HashMap<String, String>, http_response: http::Response) -> Result<Vec<AssertResult>, Error> {
-    pub fn eval_asserts(self, _variables: &HashMap<String, String>, http_response: http::Response) -> Vec<AssertResult> {
+    pub fn eval_asserts(self, _variables: &HashMap<String, String>, http_response: http::response::Response) -> Vec<AssertResult> {
         let mut asserts = vec![];
 
         let version = self.clone().version;
@@ -105,7 +107,7 @@ impl Response {
         asserts
     }
 
-    pub fn eval_captures(self, _variables: &HashMap<String, String>, http_response: http::Response) -> Result<Vec<(String, Value)>, Error> {
+    pub fn eval_captures(self, _variables: &HashMap<String, String>, http_response: http::response::Response) -> Result<Vec<(String, Value)>, Error> {
         let mut captures = vec![];
         for Capture { name, query, .. } in self.clone().captures() {
             let value = query.eval(http_response.clone())?;
@@ -181,7 +183,7 @@ pub fn user_response() -> Response {
 pub fn test_eval_asserts() {
     let variables = HashMap::new();
     assert_eq!(
-        user_response().eval_asserts(&variables, http::xml_two_users_http_response()),
+        user_response().eval_asserts(&variables, http::response::xml_two_users_http_response()),
         vec![
             AssertResult::Version {
                 actual: String::from("1.0"),
@@ -221,7 +223,7 @@ pub fn test_eval_asserts() {
 pub fn test_eval_captures() {
     let variables = HashMap::new();
     assert_eq!(
-        user_response().eval_captures(&variables, http::xml_two_users_http_response()).unwrap(),
+        user_response().eval_captures(&variables, http::response::xml_two_users_http_response()).unwrap(),
         vec![
             (String::from("UserCount"), Value::Float(2, 0))
         ]

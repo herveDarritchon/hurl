@@ -1,4 +1,6 @@
-use super::http::*;
+use crate::http::core::*;
+use crate::http::request::*;
+use crate::http::response::*;
 
 pub trait Textable {
     fn to_text(&self) -> String;

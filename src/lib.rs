@@ -3,6 +3,7 @@ pub mod format;
 pub mod linter;
 pub mod parser;
 pub mod runner;
+pub mod http;
 
 //pub mod assert;
 //

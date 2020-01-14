@@ -3,6 +3,7 @@ extern crate hurl;
 use hurl::core::ast;
 use hurl::core::core::{Pos, SourceInfo};
 use hurl::runner;
+use hurl::http;
 use std::collections::HashMap;
 use std;
 use hurl::core::ast::HurlString;
@@ -17,7 +18,7 @@ fn test_hurl_file() {
     let mut parser = hurl::parser::core::Parser::init(content.as_str());
     let hurl_file = hurl::parser::parser::hurl_file(&mut parser).unwrap();
     let mut variables = HashMap::new();
-    let client = runner::http::Client::init(runner::http::ClientOptions {
+    let client = http::client::Client::init(http::client::ClientOptions {
         noproxy_hosts: vec![],
         insecure: false,
     });
@@ -112,7 +113,7 @@ fn hello_request() -> ast::Request {
 
 #[test]
 fn test_hello() {
-    let client = runner::http::Client::init(runner::http::ClientOptions {
+    let client = http::client::Client::init(http::client::ClientOptions {
         noproxy_hosts: vec![],
         insecure: false,
     });

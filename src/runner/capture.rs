@@ -4,8 +4,10 @@ use crate::core::core::Value;
 
 //use super::core::{Error, RunnerError};
 use super::core::{Error};
-use super::http;
+//use super::http;
 use super::super::core::ast::*;
+
+use crate::http;
 
 #[cfg(test)]
 use self::super::query;
@@ -16,7 +18,7 @@ pub type CaptureResult = Result<(String, Value), Error>;
 
 
 impl Capture {
-    pub fn eval(self, http_response: http::Response) -> CaptureResult {
+    pub fn eval(self, http_response: http::response::Response) -> CaptureResult {
         let value = self.query.clone().eval(http_response)?;
 //        if !value.is_scalar() {
 //            return Err(Error {
@@ -83,7 +85,7 @@ fn test_invalid_xpath() {
         },
     };
 
-    let error = capture.eval(http::xml_three_users_http_response()).err().unwrap();
+    let error = capture.eval(http::response::xml_three_users_http_response()).err().unwrap();
     assert_eq!(error.source_info.start, Pos { line: 1, column: 7 });
     assert_eq!(error.inner, RunnerError::QueryInvalidXpathEval)
 }
@@ -132,7 +134,7 @@ fn test_capture_unsupported() {
 
 #[test]
 fn test_capture() {
-    assert_eq!(user_count_capture().eval(http::xml_three_users_http_response()).unwrap(),
+    assert_eq!(user_count_capture().eval(http::response::xml_three_users_http_response()).unwrap(),
                (String::from("UserCount"), Value::from_f64(3.0))
     );
 }

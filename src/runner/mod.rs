@@ -1,6 +1,5 @@
 pub mod core;
 pub mod runner;
-pub mod http;
 pub mod entry;
 pub mod request;
 pub mod text;
@@ -11,4 +10,5 @@ pub mod assert;
 pub mod predicate;
 pub mod template;
 pub mod response;
+
 mod xpath;

@@ -4,9 +4,11 @@ use crate::core::core::Value;
 use crate::core::jsonpath;
 
 use super::core::{Error, RunnerError};
-use super::http;
+//use super::http;
 use super::super::core::ast::*;
 use super::xpath;
+use crate::http;
+
 
 // QueryResult
 // success => just the value is kept
@@ -68,7 +70,7 @@ pub type QueryResult = Result<Value, Error>;
 
 
 impl Query {
-    pub fn eval(self, http_response: http::Response) -> QueryResult {
+    pub fn eval(self, http_response: http::response::Response) -> QueryResult {
         return match self.value {
             QueryValue::Status {} => Ok(Value::Integer(http_response.status as i64)),
             QueryValue::Header { name: HurlString { value: header_name,  .. }, .. } => {
@@ -218,7 +220,7 @@ pub fn xpath_users() -> Query {
 #[test]
 fn test_query_status() {
     assert_eq!(
-        Query { source_info: SourceInfo::init(0, 0, 0, 0), value: QueryValue::Status {} }.eval(http::hello_http_response()).unwrap(),
+        Query { source_info: SourceInfo::init(0, 0, 0, 0), value: QueryValue::Status {} }.eval(http::response::hello_http_response()).unwrap(),
         Value::Integer(200)
     );
 }
@@ -244,7 +246,7 @@ fn test_header_not_found() {
 //    let error = query_header.eval(http::hello_http_response()).err().unwrap();
 //    assert_eq!(error.source_info.start, Pos { line: 1, column: 8 });
 //    assert_eq!(error.inner, RunnerError::QueryHeaderNotFound);
-    assert_eq!(query_header.eval(http::hello_http_response()).unwrap(), Value::None);
+    assert_eq!(query_header.eval(http::response::hello_http_response()).unwrap(), Value::None);
 }
 
 #[test]
@@ -262,7 +264,7 @@ fn test_header() {
         },
     };
     assert_eq!(
-        query_header.eval(http::hello_http_response()).unwrap(),
+        query_header.eval(http::response::hello_http_response()).unwrap(),
         Value::String(String::from("text/html; charset=utf-8"))
     );
 }
@@ -277,7 +279,7 @@ fn test_body() {
         Query {
             source_info: SourceInfo::init(0, 0, 0, 0),
             value: QueryValue::Body {},
-        }.eval(http::hello_http_response()).unwrap(),
+        }.eval(http::response::hello_http_response()).unwrap(),
         Value::String(String::from("Hello World!"))
     );
 }
@@ -289,8 +291,8 @@ fn test_body() {
 
 #[test]
 fn test_query_invalid_utf8() {
-    let http_response = http::Response {
-        version: http::Version::Http10,
+    let http_response = http::response::Response {
+        version: http::response::Version::Http10,
         status: 0,
         headers: vec![],
         body: vec![200],
@@ -318,15 +320,15 @@ fn test_query_xpath_error_eval() {
             },
         },
     };
-    let error = query.eval(http::xml_two_users_http_response()).err().unwrap();
+    let error = query.eval(http::response::xml_two_users_http_response()).err().unwrap();
     assert_eq!(error.inner, RunnerError::QueryInvalidXpathEval);
     assert_eq!(error.source_info.start, Pos { line: 1, column: 7 });
 }
 
 #[test]
 fn test_query_xpath() {
-    assert_eq!(xpath_users().eval(http::xml_two_users_http_response()).unwrap(), Value::Nodeset(2));
-    assert_eq!(xpath_count_user_query().eval(http::xml_two_users_http_response()).unwrap(), Value::Float(2, 0));
+    assert_eq!(xpath_users().eval(http::response::xml_two_users_http_response()).unwrap(), Value::Nodeset(2));
+    assert_eq!(xpath_count_user_query().eval(http::response::xml_two_users_http_response()).unwrap(), Value::Float(2, 0));
 }
 
 
@@ -354,7 +356,7 @@ pub fn xpath_html_charset() -> Query {
 
 #[test]
 fn test_query_xpath_with_html() {
-    assert_eq!(xpath_html_charset().eval(http::html_http_response()).unwrap(), Value::String(String::from("UTF-8")));
+    assert_eq!(xpath_html_charset().eval(http::response::html_http_response()).unwrap(), Value::String(String::from("UTF-8")));
 
 
 
@@ -367,9 +369,9 @@ fn test_query_xpath_with_html() {
 // region test jsonpath
 
 #[cfg(test)]
-pub fn json_http_response() -> http::Response {
-    return http::Response {
-        version: http::Version::Http10,
+pub fn json_http_response() -> http::response::Response {
+    return http::response::Response {
+        version: http::response::Version::Http10,
         status: 0,
         headers: vec![],
         body: String::into_bytes(r#"
@@ -451,8 +453,8 @@ fn test_query_jsonpath_invalid_expression() {
 
 #[test]
 fn test_query_invalid_json() {
-    let http_response = http::Response {
-        version: http::Version::Http10,
+    let http_response = http::response::Response {
+        version: http::response::Version::Http10,
         status: 0,
         headers: vec![],
         body: String::into_bytes(String::from("xxx")),
@@ -464,8 +466,8 @@ fn test_query_invalid_json() {
 
 #[test]
 fn test_query_json_not_found() {
-    let http_response = http::Response {
-        version: http::Version::Http10,
+    let http_response = http::response::Response {
+        version: http::response::Version::Http10,
         status: 0,
         headers: vec![],
         body: String::into_bytes(String::from("{}")),

@@ -6,7 +6,9 @@ use crate::core::ast::*;
 use crate::core::core::FormatError;
 use super::core::Error;
 use super::entry::EntryResult;
-use super::http;
+//use crate::http::request::*;
+//use crate::http::response::*;
+use crate::http::client::*;
 use super::super::format;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
@@ -23,7 +25,7 @@ impl HurlResult {
 
 
 pub fn run(
-    http_client: http::Client,
+    http_client: Client,
     hurl_file: HurlFile,
     fail_fast: bool,
     init_variables: &HashMap<String, String>,

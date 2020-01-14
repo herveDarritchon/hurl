@@ -1,19 +1,19 @@
 extern crate hurl;
 
-use hurl::runner::http::*;
+use hurl::http;
 
 
-fn default_client_options() -> ClientOptions {
-    return ClientOptions { noproxy_hosts: vec![],  insecure: true };
+fn default_client_options() -> http::client::ClientOptions {
+    return http::client::ClientOptions { noproxy_hosts: vec![],  insecure: true };
 }
 
 #[test]
 fn test_hello() {
-    let client = Client::init(default_client_options());
+    let client = http::client::Client::init(default_client_options());
 
-    let request = Request {
-        method: Method::Get,
-        url: Url {
+    let request = http::request::Request {
+        method: http::request::Method::Get,
+        url: http::core::Url {
             scheme: "http".to_string(),
             host: "localhost".to_string(),
             port: Some(8000),
@@ -22,8 +22,8 @@ fn test_hello() {
         }, //"http://localhost:8000/hello".to_string(),
         //querystring_params: vec![],
         headers: vec![
-            Header { name: String::from("User-Agent"), value: String::from("hurl/0.1.1") },
-            Header { name: String::from("Host"), value: String::from("TBD") }
+            http::core::Header { name: String::from("User-Agent"), value: String::from("hurl/0.1.1") },
+            http::core::Header { name: String::from("Host"), value: String::from("TBD") }
         ],
         body: vec![],
     };
@@ -59,10 +59,10 @@ fn test_hello() {
 //}
 
 #[cfg(test)]
-fn hello_request() -> Request {
-    Request {
-        method: Method::Get,
-        url: Url {
+fn hello_request() -> http::request::Request {
+    http::request::Request {
+        method: http::request::Method::Get,
+        url: http::core::Url {
             scheme: "http".to_string(),
             host: "localhost".to_string(),
             port: Some(8000),
@@ -77,7 +77,7 @@ fn hello_request() -> Request {
 
 #[test]
 fn test_multiple_calls() {
-    let client = Client::init(default_client_options());
+    let client = http::client::Client::init(default_client_options());
     let response = client.execute(&hello_request()).unwrap();
     assert_eq!(response.status, 200);
     let response = client.execute(&hello_request()).unwrap();
@@ -88,7 +88,7 @@ fn test_multiple_calls() {
 
 #[test]
 fn test_response_headers() {
-    let client = Client::init(default_client_options());
+    let client = http::client::Client::init(default_client_options());
     let response = client.execute(&hello_request()).unwrap();
     println!("{:?}", response);
     assert_eq!(response.status, 200);
@@ -100,17 +100,17 @@ fn test_response_headers() {
 
 #[test]
 fn test_send_cookie() {
-    let client = Client::init(default_client_options());
-    let request = Request {
-        method: Method::Get,
-        url: Url {
+    let client = http::client::Client::init(default_client_options());
+    let request = http::request::Request {
+        method: http::request::Method::Get,
+        url: http::core::Url {
             scheme: "http".to_string(),
             host: "localhost".to_string(),
             port: Some(8000),
             path: "/cookies/set-request-cookie1-valueA".to_string(),
             querystring: None
         }, //"http://localhost:8000/send-cookie".to_string(),
-        headers: vec![Header {
+        headers: vec![http::core::Header {
             name: "Cookie".to_string(),
             value: "cookie1=valueA;".to_string(),
         }],
@@ -119,12 +119,13 @@ fn test_send_cookie() {
     let response = client.execute(&request).unwrap();
     assert_eq!(response.status, 200);
 
-    let _client = Client::init(default_client_options());
-    let _cookie_header = Header::from_cookies(vec![Cookie {
+    let _client = http::client::Client::init(default_client_options());
+    let _cookie_header = http::cookie::Cookie {
         name: "Cookie1".to_string(),
         value: "valueA;".to_string(),
-        max_age: None
-    }]);
+        max_age: None,
+        domain: None
+    }.to_header();
     /*
     let request = Request {
         method: Method::Get,
@@ -139,11 +140,11 @@ fn test_send_cookie() {
 
 #[test]
 fn test_redirect() {
-    let client = Client::init(default_client_options());
+    let client = http::client::Client::init(default_client_options());
 
-    let request = Request {
-        method: Method::Get,
-        url: Url {
+    let request = http::request::Request {
+        method: http::request::Method::Get,
+        url: http::core::Url {
             scheme: "http".to_string(),
             host: "localhost".to_string(),
             port: Some(8000),
@@ -163,11 +164,11 @@ fn test_redirect() {
 
 #[test]
 fn test_querystring_param() {
-    let client = Client::init(default_client_options());
+    let client = http::client::Client::init(default_client_options());
 
-    let request = Request {
-        method: Method::Get,
-        url: Url {
+    let request = http::request::Request {
+        method: http::request::Method::Get,
+        url: http::core::Url {
             scheme: "http".to_string(),
             host: "localhost".to_string(),
             port: Some(8000),
@@ -184,11 +185,11 @@ fn test_querystring_param() {
 #[test]
 // curl -H 'Host:localhost:5000' -H 'content-type:application/x-www-form-urlencoded' -X POST 'http://localhost:5000/form-params' --data-binary 'param1=value1&param2='
 fn test_form_param() {
-    let client = Client::init(default_client_options());
+    let client = http::client::Client::init(default_client_options());
 
-    let request = Request {
-        method: Method::Post,
-        url: Url {
+    let request = http::request::Request {
+        method: http::request::Method::Post,
+        url: http::core::Url {
             scheme: "http".to_string(),
             host: "localhost".to_string(),
             port: Some(8000),
@@ -196,7 +197,7 @@ fn test_form_param() {
             querystring: None
         }, // "http://localhost:8000/form-params".to_string(),
         //querystring_params: vec![],
-        headers: vec![Header {
+        headers: vec![http::core::Header {
             name: "Content-Type".to_string(),
             value: "application/x-www-form-urlencoded".to_string(),
         }],

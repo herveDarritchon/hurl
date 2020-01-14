@@ -5,11 +5,13 @@ use serde::{Deserialize, Serialize};
 use crate::core::core::{SourceInfo, Value};
 
 use super::core::{Error, RunnerError};
-use super::http;
+//use super::http;
 use super::predicate::PredicateResult;
 #[cfg(test)]
 use super::query;
 use super::super::core::ast::*;
+
+use crate::http;
 
 //#[cfg(test)]
 //use crate::core::core::{Value, SourceInfo};
@@ -129,7 +131,7 @@ fn test_invalid_xpath() {}
 
 
 impl Assert {
-    pub fn eval(self, _variables: &HashMap<String, String>, http_response: http::Response) -> AssertResult {
+    pub fn eval(self, _variables: &HashMap<String, String>, http_response: http::response::Response) -> AssertResult {
         let actual = self.query.eval(http_response);
         let source_info = self.predicate.clone().predicate_func.source_info;
         let predicate_result = match actual.clone() {
@@ -145,7 +147,7 @@ impl Assert {
 fn test_eval() {
     let variables = HashMap::new();
     assert_eq!(
-        assert_count_user().eval(&variables, http::xml_three_users_http_response()),
+        assert_count_user().eval(&variables, http::response::xml_three_users_http_response()),
         AssertResult::Explicit {
             actual: Ok(Value::Nodeset(3)),
             source_info: SourceInfo::init(1, 14, 1, 27),

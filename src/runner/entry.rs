@@ -9,14 +9,14 @@ use crate::core::core::Value;
 
 use super::assert::AssertResult;
 use super::core::Error;
-use super::http;
+use crate::http;
 use super::text::*;
 
 //pub type EntryResult = Result<EntryLog, Error>;
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct EntryResult {
-    pub request: Option<http::Request>,
-    pub response: Option<http::Response>,
+    pub request: Option<http::request::Request>,
+    pub response: Option<http::response::Response>,
     pub captures: Vec<(String, Value)>,
     pub asserts: Vec<AssertResult>,
     pub errors: Vec<Error>,
@@ -76,9 +76,9 @@ pub struct EntryResult {
 
 
 impl Entry {
-    pub fn eval(self, http_client: &http::Client,
+    pub fn eval(self, http_client: &http::client::Client,
                 variables: &mut HashMap<String, String>,
-                all_cookies: &mut HashMap<http::Domain, HashMap<http::Name, http::Cookie>>,
+                all_cookies: &mut HashMap<http::cookie::Domain, HashMap<http::cookie::Name, http::cookie::Cookie>>,
                 verbose: bool,
                 context_dir: &str,
     ) -> EntryResult {
@@ -170,7 +170,7 @@ impl Entry {
         // update cookies
         // for the domain
         let host = http_request.clone().host();
-        let mut cookies: HashMap<http::Name, http::Cookie> = match all_cookies.get(&host) {
+        let mut cookies: HashMap<http::cookie::Name, http::cookie::Cookie> = match all_cookies.get(&host) {
             None => HashMap::new(),
             Some(v) =>  v.clone(),
         };

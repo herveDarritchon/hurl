@@ -12,6 +12,7 @@ use hurl::core::core::FormatError;
 use hurl::parser;
 use hurl::runner;
 use hurl::runner::runner::HurlResult;
+use hurl::http;
 
 fn execute(filename: &str,
            verbose: bool,
@@ -68,7 +69,7 @@ fn execute(filename: &str,
                 eprintln!("[DEBUG] variables: {:?}", variables);
             }
 
-            let client = runner::http::Client::init(runner::http::ClientOptions {
+            let client = http::client::Client::init(http::client::ClientOptions {
                 noproxy_hosts,
                 insecure,
             });
