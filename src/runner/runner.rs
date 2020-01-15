@@ -1,17 +1,12 @@
 use std::collections::HashMap;
 
-
 use crate::core::ast::*;
 use crate::core::core::FormatError;
-use super::core::*;
 use crate::http::client::*;
-use super::super::format;
+
+use super::core::*;
 use super::log::*;
-
-
-
-
-
+use super::super::format;
 
 pub fn run(
     http_client: Client,
@@ -61,7 +56,6 @@ pub fn run(
 
 
         //eprintln!(">>> all cookies {:#?}", all_cookies);
-
     }
     return HurlResult {
         filename,

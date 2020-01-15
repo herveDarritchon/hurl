@@ -1,23 +1,13 @@
 use std::collections::HashMap;
+
 use crate::core::ast::*;
 use crate::core::core::SourceInfo;
 use crate::core::core::Value;
-
-use super::core::Error;
 use crate::http;
-use super::text::*;
+
 use super::core::*;
-
-
-
-
-
-
-
-
-
-
-
+use super::core::Error;
+use super::text::*;
 
 //#[derive(Clone, Debug, PartialEq, Eq,Serialize, Deserialize)]
 //#[derive(Clone, Debug, PartialEq, Eq)]
@@ -57,7 +47,6 @@ use super::core::*;
 // for all domains
 
 // but only pass cookies for one domain for the request
-
 
 
 impl Entry {
@@ -138,13 +127,13 @@ impl Entry {
 
         let asserts = match self.response {
             None => vec![],
-            Some(response) =>  response.eval_asserts(variables, http_response.clone())
+            Some(response) => response.eval_asserts(variables, http_response.clone())
         };
 
         let errors = asserts
             .iter()
             .filter_map(|assert| assert.clone().error())
-            .map(|Error{ source_info, inner,..}| Error{ source_info, inner, assert:true})
+            .map(|Error { source_info, inner, .. }| Error { source_info, inner, assert: true })
             .collect();
 //        if verbose {
 //            for assert_result in asserts.clone() {
@@ -157,9 +146,8 @@ impl Entry {
         let host = http_request.clone().host();
         let mut cookies: HashMap<http::cookie::Name, http::cookie::Cookie> = match all_cookies.get(&host) {
             None => HashMap::new(),
-            Some(v) =>  v.clone(),
+            Some(v) => v.clone(),
         };
-
 
 
         for cookie in http_response.cookies() {
@@ -174,15 +162,13 @@ impl Entry {
 
             match cookie.max_age {
                 Some(0) => {
-
-                   cookies.remove(cookie.clone().name.as_str());
+                    cookies.remove(cookie.clone().name.as_str());
                     //eprintln!(">>> cookies={:?}", cookies);
                 }
                 _ => {
                     cookies.insert(cookie.clone().name, cookie);
                 }
             }
-
         }
         if verbose {
             eprintln!("[DEBUG] Cookies for {}", host);

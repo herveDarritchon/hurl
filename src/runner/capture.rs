@@ -1,18 +1,17 @@
 #[cfg(test)]
 use crate::core::core::{Pos, SourceInfo};
 use crate::core::core::Value;
+use crate::http;
 
 //use super::core::{Error, RunnerError};
-use super::core::{Error};
+use super::core::Error;
+#[cfg(test)]
+use super::core::RunnerError;
 //use super::http;
 use super::super::core::ast::*;
 
-use crate::http;
-
 #[cfg(test)]
 use self::super::query;
-#[cfg(test)]
-use super::core::{RunnerError};
 
 pub type CaptureResult = Result<(String, Value), Error>;
 

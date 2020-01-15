@@ -1,11 +1,14 @@
 use std::collections::HashMap;
 
-use crate::core::core::Value;
-//#[cfg(test)]
-use crate::runner::core::RunnerError;
 #[cfg(test)]
 use crate::core::core::SourceInfo;
+use crate::core::core::Value;
+use crate::http;
+//#[cfg(test)]
+use crate::runner::core::RunnerError;
+use crate::runner::text::Textable;
 
+use super::core::*;
 use super::core::Error;
 //use super::http;
 use super::super::core::ast::*;
@@ -15,15 +18,10 @@ use self::super::assert;
 #[cfg(test)]
 use self::super::capture;
 
-use crate::http;
-use crate::runner::text::Textable;
-use super::core::*;
-
 //#[cfg(test)]
 //use crate::core::core::{SourceInfo};
 
 //pub type ResponseResult = Result<ResponseLog, Error>;
-
 
 
 impl Response {
@@ -50,7 +48,7 @@ impl Response {
         asserts.push(AssertResult::Version {
             actual: http_response.clone().version.to_text(),
             expected: version.value.as_str().to_string(),
-            source_info: version.source_info
+            source_info: version.source_info,
         });
 
         let status = self.clone().status;
@@ -77,7 +75,7 @@ impl Response {
                                 actual: Err(Error {
                                     source_info: header.name.clone().source_info,
                                     inner: RunnerError::QueryHeaderNotFound {},
-                                    assert: false
+                                    assert: false,
                                 }),
                                 expected,
                                 source_info: header.name.clone().source_info,
@@ -110,8 +108,6 @@ impl Response {
         }
         Ok(captures)
     }
-
-
 }
 
 
@@ -129,7 +125,7 @@ pub fn user_response() -> Response {
     // HTTP/1.1 200
     let response = Response {
         line_terminators: vec![],
-        version: Version { value: VersionValue::Version1, source_info: SourceInfo:: init(2,6,2,9)},
+        version: Version { value: VersionValue::Version1, source_info: SourceInfo::init(2, 6, 2, 9) },
         space0: whitespace.clone(),
         status: Status { value: 200, source_info: SourceInfo::init(2, 10, 2, 13) },
         space1: whitespace.clone(),
@@ -183,12 +179,12 @@ pub fn test_eval_asserts() {
             AssertResult::Version {
                 actual: String::from("1.0"),
                 expected: String::from("1.0"),
-                source_info: SourceInfo::init(2, 6, 2, 9)
+                source_info: SourceInfo::init(2, 6, 2, 9),
             },
             AssertResult::Status {
                 actual: 200,
                 expected: 200,
-                source_info: SourceInfo::init(2, 10, 2, 13)
+                source_info: SourceInfo::init(2, 10, 2, 13),
             },
             AssertResult::Explicit {
                 actual: Ok(Value::Nodeset(2)),
@@ -196,7 +192,7 @@ pub fn test_eval_asserts() {
                 predicate_result: Some(Err(Error {
                     source_info: SourceInfo::init(1, 14, 1, 27),
                     inner: RunnerError::PredicateValue(Value::Nodeset(2)),
-                    assert: false
+                    assert: false,
                 })),
             }
         ]

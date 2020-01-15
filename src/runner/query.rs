@@ -2,13 +2,12 @@
 use crate::core::core::{Pos, SourceInfo};
 use crate::core::core::Value;
 use crate::core::jsonpath;
+use crate::http;
 
 use super::core::{Error, RunnerError};
 //use super::http;
 use super::super::core::ast::*;
 use super::xpath;
-use crate::http;
-
 
 // QueryResult
 // success => just the value is kept
@@ -73,17 +72,17 @@ impl Query {
     pub fn eval(self, http_response: http::response::Response) -> QueryResult {
         return match self.value {
             QueryValue::Status {} => Ok(Value::Integer(http_response.status as i64)),
-            QueryValue::Header { name: HurlString { value: header_name,  .. }, .. } => {
+            QueryValue::Header { name: HurlString { value: header_name, .. }, .. } => {
                 match http_response.get_header(header_name.as_str(), false) {
                     //None =>  Err(Error { source_info, inner: RunnerError::QueryHeaderNotFound, assert: false }),
-                    None =>  Ok(Value::None),
-                    Some(value) =>  Ok(Value::String(value))
+                    None => Ok(Value::None),
+                    Some(value) => Ok(Value::String(value))
                 }
             }
             QueryValue::Cookie { name: HurlString { value: cookie_name, source_info, .. }, .. } => {
                 match http_response.get_cookie(cookie_name.as_str()) {
-                    None =>  Err(Error { source_info, inner: RunnerError::QueryCookieNotFound, assert: false }),
-                    Some(value) =>  Ok(Value::String(value))
+                    None => Err(Error { source_info, inner: RunnerError::QueryCookieNotFound, assert: false }),
+                    Some(value) => Ok(Value::String(value))
                 }
             }
             QueryValue::Body {} => {
@@ -112,17 +111,19 @@ impl Query {
                             Err(xpath::XpathError::InvalidXML {}) => Err(Error {
                                 source_info: self.source_info,
                                 inner: RunnerError::QueryInvalidXml
-                                , assert: false
+                                ,
+                                assert: false,
                             }),
                             Err(xpath::XpathError::InvalidHtml {}) => Err(Error {
                                 source_info: self.source_info,
                                 inner: RunnerError::QueryInvalidXml
-                                , assert: false
+                                ,
+                                assert: false,
                             }),
                             Err(xpath::XpathError::Eval {}) => Err(Error {
                                 source_info,
                                 inner: RunnerError::QueryInvalidXpathEval,
-                                assert: false
+                                assert: false,
                             }),
                             Err(xpath::XpathError::Unsupported {}) => {
                                 panic!("Unsupported xpath {}", value); // good usecase for panic - I could nmot reporduce this usecase myself
@@ -138,12 +139,12 @@ impl Query {
                 };
                 let json = match String::from_utf8(http_response.body) {
                     Err(_) => return Err(Error { source_info: self.source_info, inner: RunnerError::QueryInvalidUtf8, assert: false }),
-                    Ok(v)=> v
+                    Ok(v) => v
                 };
                 let value = match expr.eval(json.as_str()) {
                     Err(_) => {
-                        return Err(Error { source_info: self.source_info, inner: RunnerError::QueryInvalidJson, assert: false })
-                    },
+                        return Err(Error { source_info: self.source_info, inner: RunnerError::QueryInvalidJson, assert: false });
+                    }
                     Ok(value) => {
                         if value == Value::List(vec![]) { Value::None } else { value }
                     }
@@ -353,15 +354,10 @@ pub fn xpath_html_charset() -> Query {
 }
 
 
-
 #[test]
 fn test_query_xpath_with_html() {
     assert_eq!(xpath_html_charset().eval(http::response::html_http_response()).unwrap(), Value::String(String::from("UTF-8")));
-
-
-
 }
-
 
 
 // endregion

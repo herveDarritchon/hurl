@@ -1,7 +1,9 @@
+use serde::ser::{Serializer, SerializeStruct};
 use serde::Serialize;
-use serde::ser::{ Serializer, SerializeStruct};
-use super::core::*;
+
 use crate::http;
+
+use super::core::*;
 
 impl Serialize for HurlResult {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -37,7 +39,7 @@ impl Serialize for AssertResult {
     {
         let mut state = serializer.serialize_struct("??", 3)?;
         match self {
-            AssertResult::Version {source_info, actual, expected} => {
+            AssertResult::Version { source_info, actual, expected } => {
                 state.serialize_field("source_info", source_info)?;
                 state.serialize_field("actual", actual)?;
                 state.serialize_field("expected", expected)?;
@@ -102,11 +104,10 @@ impl Serialize for http::response::Version {
         where
             S: Serializer,
     {
-
         match self {
-            http::response::Version::Http10 =>  serializer.serialize_str("HTTP/1.0"),
-            http::response::Version::Http11 =>  serializer.serialize_str("HTTP/1.1"),
-            http::response::Version::Http2 =>  serializer.serialize_str("HTTP/2"),
+            http::response::Version::Http10 => serializer.serialize_str("HTTP/1.0"),
+            http::response::Version::Http11 => serializer.serialize_str("HTTP/1.1"),
+            http::response::Version::Http2 => serializer.serialize_str("HTTP/2"),
         }
     }
 }

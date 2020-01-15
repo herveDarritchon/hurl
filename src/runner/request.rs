@@ -6,13 +6,13 @@ use std::collections::HashMap;
 
 #[cfg(test)]
 use crate::core::core::SourceInfo;
-use super::core::{Error, RunnerError};
-//use super::core::*;
-
-//use super::log::*;
-use super::super::core::ast::*;
 use crate::http;
 
+use super::core::{Error, RunnerError};
+//use super::log::*;
+use super::super::core::ast::*;
+
+//use super::core::*;
 
 fn has_header(headers: &Vec<http::core::Header>, name: String) -> bool {
     for header in headers {
@@ -56,18 +56,17 @@ impl Request {
                 });
             }
             Ok(u) => {
-
                 let url = http::core::Url {
                     scheme: u.scheme().to_string(),
                     host: u.host_str().unwrap().to_string(),
                     port: u.port(),
                     path: u.path().to_string(),
                 };
-                let mut params : Vec<http::core::Param>= vec![];
+                let mut params: Vec<http::core::Param> = vec![];
                 for (name, value) in u.query_pairs() {
-                    params.push(http::core::Param{
+                    params.push(http::core::Param {
                         name: name.to_string(),
-                        value: value.to_string()
+                        value: value.to_string(),
                     });
                 }
 

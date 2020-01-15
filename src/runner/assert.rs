@@ -1,16 +1,17 @@
 //#[cfg(test)]
 //use crate::core::core::Pos;
 use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
+
 use crate::core::core::{SourceInfo, Value};
+use crate::http;
 
 use super::core::{Error, RunnerError};
-
+use super::core::*;
 #[cfg(test)]
 use super::query;
 use super::super::core::ast::*;
-use super::core::*;
-use crate::http;
 
 //#[cfg(test)]
 //use crate::core::core::{Value, SourceInfo};
@@ -19,14 +20,12 @@ use crate::http;
 //use crate::runner::core::{RunnerError};
 
 
-
-
 impl AssertResult {
     pub fn fail(self) -> bool {
         return match self {
-            AssertResult::Version { actual, expected, ..} => actual != expected,
-            AssertResult::Status { actual, expected, ..} => actual != expected,
-            AssertResult::Header { ..} => false,
+            AssertResult::Version { actual, expected, .. } => actual != expected,
+            AssertResult::Status { actual, expected, .. } => actual != expected,
+            AssertResult::Header { .. } => false,
             AssertResult::Explicit { .. } => true
         };
     }
@@ -40,10 +39,11 @@ impl AssertResult {
                     Some(Error {
                         source_info,
                         inner: RunnerError::AssertVersion { actual: actual.to_string() }
-                        , assert: false
+                        ,
+                        assert: false,
                     })
                 }
-            },
+            }
             AssertResult::Status { actual, expected, source_info } => {
                 if actual == expected {
                     None
@@ -51,35 +51,32 @@ impl AssertResult {
                     Some(Error {
                         source_info,
                         inner: RunnerError::AssertStatus { actual: actual.to_string() },
-                        assert: false
+                        assert: false,
                     })
                 }
-            },
-            AssertResult::Header { actual, expected,source_info } => {
-               match actual {
-                  Err(e) => Some(e),
-                   Ok(s) => {
-                       if s == expected {
-                           None
-                       } else {
-                           Some(Error {
-                               source_info,
-                               inner: RunnerError::AssertHeaderValueError { actual: s},
-                               assert: false
-                           })
-                       }
-                   }
-               }
-
-            },
-            AssertResult::Explicit { actual: Err(e),.. } => {  Some(e) },
-            AssertResult::Explicit { predicate_result: Some(Err(e)),.. } => {  Some(e) },
+            }
+            AssertResult::Header { actual, expected, source_info } => {
+                match actual {
+                    Err(e) => Some(e),
+                    Ok(s) => {
+                        if s == expected {
+                            None
+                        } else {
+                            Some(Error {
+                                source_info,
+                                inner: RunnerError::AssertHeaderValueError { actual: s },
+                                assert: false,
+                            })
+                        }
+                    }
+                }
+            }
+            AssertResult::Explicit { actual: Err(e), .. } => { Some(e) }
+            AssertResult::Explicit { predicate_result: Some(Err(e)), .. } => { Some(e) }
             _ => None,
-
         };
     }
 }
-
 
 
 // region test data
@@ -129,7 +126,7 @@ impl Assert {
         let source_info = self.predicate.clone().predicate_func.source_info;
         let predicate_result = match actual.clone() {
             Err(_) => None,
-            Ok(actual) =>  Some(self.predicate.eval(_variables, actual.clone()))
+            Ok(actual) => Some(self.predicate.eval(_variables, actual.clone()))
         };
 
         return AssertResult::Explicit { actual, source_info, predicate_result };

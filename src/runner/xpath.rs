@@ -1,7 +1,7 @@
 // unique entry point to libxml
 extern crate libxml;
 
-use std::ffi::{CStr};
+use std::ffi::CStr;
 
 use super::super::core::core::Value;
 
@@ -16,7 +16,7 @@ pub enum XpathError {
 pub fn eval_xml(xml: String, expr: String) -> Result<Value, XpathError> {
     let parser = libxml::parser::Parser::default();
     return match parser.parse_string(xml) {
-        Ok(doc) =>    if doc.get_root_element() == None {
+        Ok(doc) => if doc.get_root_element() == None {
             Err(XpathError::InvalidXML {})
         } else {
             eval(doc, expr)
@@ -24,6 +24,7 @@ pub fn eval_xml(xml: String, expr: String) -> Result<Value, XpathError> {
         Err(_) => Err(XpathError::InvalidXML {})
     };
 }
+
 pub fn eval_html(html: String, expr: String) -> Result<Value, XpathError> {
     let parser = libxml::parser::Parser::default_html();
     return match parser.parse_string(html) {
@@ -35,13 +36,12 @@ pub fn eval_html(html: String, expr: String) -> Result<Value, XpathError> {
             } else {
                 eval(doc, expr)
             }
-
-        },
+        }
         Err(_) => Err(XpathError::InvalidHtml {})
     };
 }
 
-pub fn eval(doc : libxml::tree::Document, expr: String) -> Result<Value, XpathError> {
+pub fn eval(doc: libxml::tree::Document, expr: String) -> Result<Value, XpathError> {
     //let parser = libxml::parser::Parser::default();
 //    let doc = match parser.parse_string(xml) {
 //        Ok(doc) => doc,
@@ -84,10 +84,6 @@ pub fn eval(doc : libxml::tree::Document, expr: String) -> Result<Value, XpathEr
 }
 
 
-
-
-
-
 #[test]
 fn test_xml() {
     let xml = String::from(r#"<?xml version="1.0" encoding="utf-8"?>
@@ -115,7 +111,7 @@ fn test_xml() {
 fn test_error_eval() {
     assert_eq!(eval_xml(String::from("<a/>"), String::from("^^^")).err().unwrap(), XpathError::Eval {});
     assert_eq!(eval_xml(String::from("<a/>"), String::from("//")).err().unwrap(), XpathError::Eval {});
-   // assert_eq!(1,2);
+    // assert_eq!(1,2);
 }
 
 
@@ -148,7 +144,6 @@ fn test_html() {
 </html>"#);
     let xpath = String::from("normalize-space(/html/head/meta/@charset)");
     assert_eq!(eval_html(html.clone(), xpath).unwrap(), Value::String(String::from("UTF-8")));
-
 }
 
 
@@ -158,6 +153,5 @@ fn test_bug() {
     //let xpath = String::from("boolean(count(//a[contains(@href,'xxx')]))");
     let xpath = String::from("boolean(count(//a[contains(@href,'xxx')]))");
     assert_eq!(eval_html(html.clone(), xpath).unwrap(), Value::Bool(false));
-
 }
 

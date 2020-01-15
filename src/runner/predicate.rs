@@ -1,16 +1,15 @@
 use std::collections::HashMap;
 
 use regex::Regex;
+
 //use serde::{Deserialize, Serialize};
 #[cfg(test)]
 use crate::core::core::SourceInfo;
 use crate::core::core::Value;
 
 use super::core::{Error, RunnerError};
-use super::super::core::ast::*;
-
 use super::core::*;
-
+use super::super::core::ast::*;
 
 // equals 10         function  return ()
 // not equals 10
@@ -48,7 +47,7 @@ impl Predicate {
                     Err(Error {
                         source_info: self.predicate_func.source_info,
                         inner: RunnerError::PredicateValue(value),
-                        assert: false
+                        assert: false,
                     })
                 } else { Ok(()) }
             }
@@ -59,7 +58,7 @@ impl Predicate {
                     Err(Error {
                         source_info: self.predicate_func.source_info,
                         inner: RunnerError::PredicateValue(value),
-                        assert: false
+                        assert: false,
                     })
                 }
             }
@@ -241,7 +240,6 @@ impl PredicateFunc {
 
             // firstEquals Int
             (PredicateFuncValue::FirstEqualInt { value: expected, .. }, Value::List(values)) => {
-
                 match values.get(0) {
                     Some(Value::Integer(actual)) => {
                         if *actual == expected {
@@ -264,13 +262,12 @@ impl PredicateFunc {
 
 
             // exist
-            (PredicateFuncValue::Exist { },value) => {
+            (PredicateFuncValue::Exist {}, value) => {
                 match value {
-                    Value::None| Value::Nodeset(0) => Err(Error { source_info, inner: RunnerError::PredicateValue(value), assert: false }),
+                    Value::None | Value::Nodeset(0) => Err(Error { source_info, inner: RunnerError::PredicateValue(value), assert: false }),
                     _ => Ok(())
                 }
             }
-
 
 
             // default

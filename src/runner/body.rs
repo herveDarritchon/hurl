@@ -2,7 +2,6 @@
 
 use std::fs::File;
 use std::io::prelude::*;
-
 //#[cfg(test)]
 use std::path::Path;
 
@@ -12,7 +11,6 @@ use crate::core::core::SourceInfo;
 //use super::core::{Error, RunnerError};
 use super::core::{Error, RunnerError};
 use super::super::core::ast::*;
-
 
 impl Body {
     pub fn eval(self, context_dir: &str) -> Result<Vec<u8>, Error> {
@@ -45,7 +43,7 @@ impl Bytes {
                     Err(_) => Err(Error {
                         source_info: filename.source_info,
                         inner: RunnerError::FileReadAccess { value: absolute_filename },
-                        assert: false
+                        assert: false,
                     })
                 }
             }
