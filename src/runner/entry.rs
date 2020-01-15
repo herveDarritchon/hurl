@@ -73,11 +73,8 @@ impl Serialize for http::cookie::Cookie {
         let mut state = serializer.serialize_struct("??", 3)?;
         state.serialize_field("name", &self.clone().name)?;
         state.serialize_field("value", &self.clone().value)?;
-        match self.clone().domain {
-            Some(value) => {
-                state.serialize_field("domain", &value)?;
-            },
-            _ => {}
+        if let Some(value) = self.clone().domain {
+            state.serialize_field("domain", &value)?;
         }
         state.end()
     }
