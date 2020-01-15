@@ -13,7 +13,7 @@ impl Textable for Request {
                             self.clone().method.to_text(),
                             self.clone().url()
         );
-        for header in self.headers.clone() {
+        for header in self.clone().headers() {
             s.push_str(header.to_text().as_str());
         }
         s.push_str("\n");

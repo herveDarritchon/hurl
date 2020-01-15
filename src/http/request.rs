@@ -19,7 +19,7 @@ const FRAGMENT: &AsciiSet = &CONTROLS
     .add(b'`');
 
 // region request
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Request {
     pub method: Method,
     pub url: Url,

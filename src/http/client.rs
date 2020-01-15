@@ -44,7 +44,7 @@ impl Client {
     //pub fn execute(&self, request: &Request) -> Result<Response, Error> {
     pub fn execute(&self, request: &Request) -> Result<Response, RunnerError> {
         let mut headers = reqwest::header::HeaderMap::new();
-        for header in request.clone().headers {
+        for header in request.clone().headers() {
             headers.insert(
                 reqwest::header::HeaderName::from_lowercase(
                     header.name.to_lowercase().as_str().as_bytes(),

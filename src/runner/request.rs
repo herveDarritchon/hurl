@@ -114,10 +114,11 @@ impl Request {
 
         // add cookies
         let host = url.host.as_str();
-        let mut cookies: HashMap<http::cookie::Name, http::cookie::Cookie> = match all_cookies.get(host) {
-            None => HashMap::new(),
-            Some(v) => v.clone(),
-        };
+        let mut cookies = vec![];
+//        let mut cookies: HashMap<http::cookie::Name, http::cookie::Cookie> = match all_cookies.get(host) {
+//            None => HashMap::new(),
+//            Some(v) => v.clone(),
+//        };
 
         // TODO cookie from header
         for cookie in self.clone().cookies() {
@@ -127,7 +128,8 @@ impl Request {
                 max_age: None,
                 domain: None,
             };
-            headers.push(cookie.to_header());
+            //headers.push(cookie.to_header());
+            cookies.push(cookie);
         }
 
 
@@ -174,7 +176,7 @@ impl Request {
             url,
             querystring,
             headers,
-            cookies: vec![],
+            cookies,
             body: bytes,
         };
         return Ok(request);

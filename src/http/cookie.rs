@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 pub type Domain = String;
 pub type Name = String;
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Cookie {
     pub name: String,
     pub value: String,
@@ -60,7 +60,7 @@ impl Cookie {
 }
 
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct CookieStore {
     cookies: Vec<Cookie>
 }

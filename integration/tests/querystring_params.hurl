@@ -13,3 +13,12 @@ GET http://localhost:8000/querystring-params?param1=value1&param2=&param3=a%3db
 HTTP/1.0 200
 
 
+# combine version
+GET http://localhost:8000/querystring-params?param1=value1
+[QueryStringParams]
+param2: ""
+param3: a=b
+
+HTTP/1.0 200
+
+
