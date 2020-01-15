@@ -1,6 +1,6 @@
 extern crate libxml;
 extern crate serde_json;
-extern crate url;
+extern crate url as external_url;
 
 use std::collections::HashMap;
 
@@ -15,8 +15,6 @@ use crate::http;
 
 
 use percent_encoding::{utf8_percent_encode, AsciiSet, CONTROLS};
-
-
 
 
 const FRAGMENT: &AsciiSet = &CONTROLS
@@ -54,25 +52,57 @@ impl Request {
         // calculate url
         //
         let url = self.clone().url.eval(&variables)?;
-        let mut url = match eval_url(url) {
-            Err(e) => return Err(Error { source_info: self.clone().url.source_info, inner: e, assert: false }),
-            Ok(url) => url
-        };
+//        let mut url = match eval_url(url) {
+//            Err(e) => return Err(Error { source_info: self.clone().url.source_info, inner: e, assert: false }),
+//            Ok(url) => url
+//        };
         //let mut url =  format!("{}?", url);
 
+        let mut querystring: Vec<http::core::Param> = vec![];
 
-        if !self.clone().querystring_params().is_empty() {
-            let mut querystring_params = vec![];
-            for param in self.clone().querystring_params() {
-                let name = param.name.value;
-                let value = param.value.eval(variables)?;
-                let encoded =  utf8_percent_encode(value.as_str(), FRAGMENT).to_string();
-                querystring_params.push(format!("{}={}", name, encoded));
+        // query string from url
+        // parse url string
+        let (url, params) = match external_url::Url::parse(url.as_str()) {
+            Err(_) => {
+                return Err(Error {
+                    source_info: self.clone().url.source_info,
+                    inner: RunnerError::InvalidURL(url),
+                    assert: false,
+                });
             }
+            Ok(u) => {
+
+                let url = http::core::Url {
+                    scheme: u.scheme().to_string(),
+                    host: u.host_str().unwrap().to_string(),
+                    port: u.port(),
+                    path: u.path().to_string(),
+                };
+                let mut params : Vec<http::core::Param>= vec![];
+                for (name, value) in u.query_pairs() {
+                    params.push(http::core::Param{
+                        name: name.to_string(),
+                        value: value.to_string()
+                    });
+                }
 
 
-            url.querystring = Some(querystring_params.join("&"));
+                (url, params)
+            }
+        };
+        for param in params {
+            querystring.push(param);
         }
+        for param in self.clone().querystring_params() {
+            let name = param.name.value;
+            let value = param.value.eval(variables)?;
+            //let value = utf8_percent_encode(value.as_str(), FRAGMENT).to_string();
+            //self.querystring.push(format!("{}={}", name, encoded));
+            querystring.push(http::core::Param { name, value });
+        }
+
+
+        //url.querystring = Some(querystring_params.join("&"));
 
 
         // headers
@@ -80,8 +110,6 @@ impl Request {
         for header in self.clone().headers {
             headers.push(header.eval(variables)?);
         }
-
-
 
 
         // add cookies
@@ -93,15 +121,14 @@ impl Request {
 
         // TODO cookie from header
         for cookie in self.clone().cookies() {
-          let cookie = http::cookie::Cookie {
+            let cookie = http::cookie::Cookie {
                 name: cookie.clone().name.value,
                 value: cookie.clone().value.value,
                 max_age: None,
-                domain: None
+                domain: None,
             };
             headers.push(cookie.to_header());
         }
-
 
 
         if !self.clone().form_params().is_empty() {
@@ -111,7 +138,7 @@ impl Request {
             });
         }
 
-//        vec![
+        //        vec![
 //            http::Header {
 //                name: String::from("User-Agent"),
 //                value: user_agent
@@ -145,15 +172,13 @@ impl Request {
         let request = http::request::Request {
             method: self.method.eval(),
             url,
-            querystring: vec![],
+            querystring,
             headers,
             cookies: vec![],
             body: bytes,
         };
         return Ok(request);
     }
-
-
 }
 // endregion
 
@@ -186,7 +211,7 @@ impl Method {
 #[cfg(test)]
 pub fn hello_request() -> Request {
 
-    // GET {{base_url}}/hello
+// GET {{base_url}}/hello
     let whitespace = Whitespace {
         value: String::from(" "),
         source_info: SourceInfo::init(0, 0, 0, 0),
@@ -300,7 +325,9 @@ pub fn query_request() -> Request {
                         source_info: SourceInfo::init(0, 0, 0, 0),
                     }),
                     param(String::from("param2"), HurlTemplate {
-                        elements: vec![],
+                        elements: vec![
+                            HurlTemplateElement::Literal { value: HurlString2 { value: "a b".to_string(), encoded: None } }
+                        ],
                         delimiter: "".to_string(),
                         source_info: SourceInfo::init(0, 0, 0, 0),
                     })
@@ -337,7 +364,6 @@ pub fn test_query_request() {
     variables.insert(String::from("param1"), String::from("value1"));
     let mut http_request = query_request().eval(&variables, &cookies, "current_dir").unwrap();
     assert_eq!(http_request, http::request::query_http_request());
-
 }
 
 
@@ -346,7 +372,7 @@ pub fn split_url(url: String) -> (String, Vec<http::core::Param>) {
         None => (url, vec![]),
         Some(index) => {
             let (url, params) = url.split_at(index);
-            //println!("params={:?}", params);
+//println!("params={:?}", params);
             let params: Vec<http::core::Param> = params[1..].split('&')
                 .map(|s| {
                     return match s.find('=') {
@@ -387,10 +413,10 @@ pub fn eval_url(s: String) -> Result<http::core::Url, RunnerError> {
             host: u.host_str().unwrap().to_string(),
             port: u.port(),
             path: u.path().to_string(),
-            querystring: match u.query() {
-                None => None,
-                Some(s) => Some(s.to_string())
-            },
+//            querystring: match u.query() {
+//                None => None,
+//                Some(s) => Some(s.to_string())
+//            },
         })
     };
 }
@@ -402,7 +428,7 @@ pub fn test_eval_url() {
     let url = eval_url(String::from("http://localhost:8000/querystring-params?param1=value1")).unwrap();
     assert_eq!(url.host, "localhost");
     assert_eq!(url.port, Some(8000));
-    assert_eq!(url.querystring.unwrap(), String::from("param1=value1"));
+// assert_eq!(url.querystring.unwrap(), String::from("param1=value1"));
 }
 
 // endregion

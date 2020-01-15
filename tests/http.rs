@@ -4,7 +4,7 @@ use hurl::http;
 
 
 fn default_client_options() -> http::client::ClientOptions {
-    return http::client::ClientOptions { noproxy_hosts: vec![],  insecure: true };
+    return http::client::ClientOptions { noproxy_hosts: vec![], insecure: true };
 }
 
 #[test]
@@ -18,7 +18,7 @@ fn test_hello() {
             host: "localhost".to_string(),
             port: Some(8000),
             path: "/hello".to_string(),
-            querystring: None
+            //   querystring: None
         }, //"http://localhost:8000/hello".to_string(),
         //querystring_params: vec![],
         querystring: vec![],
@@ -69,7 +69,7 @@ fn hello_request() -> http::request::Request {
             host: "localhost".to_string(),
             port: Some(8000),
             path: "/hello".to_string(),
-            querystring: None
+            //   querystring: None
         }, //"http://localhost:8000/hello".to_string(),
         querystring: vec![],
         headers: vec![],
@@ -86,7 +86,6 @@ fn test_multiple_calls() {
     let response = client.execute(&hello_request()).unwrap();
     assert_eq!(response.status, 200);
 }
-
 
 
 #[test]
@@ -111,7 +110,7 @@ fn test_send_cookie() {
             host: "localhost".to_string(),
             port: Some(8000),
             path: "/cookies/set-request-cookie1-valueA".to_string(),
-            querystring: None
+            //      querystring: None
         }, //"http://localhost:8000/send-cookie".to_string(),
         querystring: vec![],
         headers: vec![http::core::Header {
@@ -129,7 +128,7 @@ fn test_send_cookie() {
         name: "Cookie1".to_string(),
         value: "valueA;".to_string(),
         max_age: None,
-        domain: None
+        domain: None,
     }.to_header();
     /*
     let request = Request {
@@ -154,7 +153,7 @@ fn test_redirect() {
             host: "localhost".to_string(),
             port: Some(8000),
             path: "/redirect".to_string(),
-            querystring: None
+            //   querystring: None
         }, // "http://localhost:8000/redirect".to_string(),
         querystring: vec![],
         headers: vec![],
@@ -180,9 +179,13 @@ fn test_querystring_param() {
             host: "localhost".to_string(),
             port: Some(8000),
             path: "/querystring-params".to_string(),
-            querystring: Some(String::from("param1=value1&param2&param3=a%3db"))
+            //  querystring: Some(String::from("param1=value1&param2&param3=a%3db"))
         },
-        querystring: vec![],
+        querystring: vec![
+            http::core::Param { name: String::from("param1"), value: String::from("value1") },
+            http::core::Param { name: String::from("param2"), value: String::from("") },
+            http::core::Param { name: String::from("param3"), value: String::from("a=b") },
+        ],
         headers: vec![],
         cookies: vec![],
         body: vec![],
@@ -203,7 +206,6 @@ fn test_form_param() {
             host: "localhost".to_string(),
             port: Some(8000),
             path: "/form-params".to_string(),
-            querystring: None
         }, // "http://localhost:8000/form-params".to_string(),
         querystring: vec![],
         headers: vec![http::core::Header {

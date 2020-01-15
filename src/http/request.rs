@@ -2,6 +2,21 @@ use super::core::*;
 use super::cookie::*;
 use serde::{Deserialize, Serialize};
 
+use percent_encoding::{utf8_percent_encode, AsciiSet, CONTROLS};
+
+
+
+
+const FRAGMENT: &AsciiSet = &CONTROLS
+    .add(b' ')
+    .add(b'"')
+    .add(b':')
+    .add(b'/')
+    .add(b'<')
+    .add(b'>')
+    .add(b'+')
+    .add(b'=')
+    .add(b'`');
 
 // region request
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -26,6 +41,34 @@ fn has_header(headers: &Vec<Header>, name: String) -> bool {
 impl Request {
     pub fn host(self) -> String {
         return self.url.host;
+    }
+
+    pub fn url(self) -> String {
+        let port =  match self.url.port {
+            None => String::from(""),
+            Some(p) => format!(":{}", p)
+        };
+        let querystring = if self.querystring.is_empty() {
+              String::from("")
+
+        } else {
+            let mut buf = String::from("");
+            for param in self.querystring {
+                if !buf.is_empty() {
+                    buf.push('&');
+                }
+                let encoded = utf8_percent_encode(param.value.as_str(), FRAGMENT).to_string();
+                buf.push_str(format!("{}={}", param.name, encoded).as_str());
+            }
+            format!("?{}", buf)
+        };
+        return format!("{}://{}{}{}{}",
+                       self.url.scheme,
+                       self.url.host,
+                       port,
+                       self.url.path,
+                       querystring
+        );
     }
 
     pub fn headers(self) -> Vec<Header> {
@@ -61,7 +104,6 @@ pub fn hello_http_request() -> Request {
             host: "localhost".to_string(),
             port: Some(8000),
             path: "/hello".to_string(),
-            querystring: None,
         },
         querystring: vec![],
         headers: vec![],
@@ -81,14 +123,16 @@ pub fn query_http_request() -> Request {
             host: "localhost".to_string(),
             port: Some(8000),
             path: "/querystring-params".to_string(),
-            querystring: Some(String::from("param1=value1&param2=")),
         },
         //String::from("http://localhost:8000/querystring-params"),
 //        querystring_params: vec![
 //            Param { name: String::from("param1"), value: String::from("value1") },
 //            Param { name: String::from("param2"), value: String::from("") }
 //        ],
-        querystring: vec![],
+        querystring: vec![
+            Param { name: String::from("param1"), value: String::from("value1") },
+            Param { name: String::from("param2"), value: String::from("a b") },
+        ],
         headers: vec![
 //            Header { name: String::from("User-Agent"), value: format!("hurl/{}", clap::crate_version!()) },
 //            Header { name: String::from("Host"), value: String::from("localhost") }
@@ -108,7 +152,6 @@ pub fn custom_http_request() -> Request {
             host: "localhost".to_string(),
             port: None,
             path: "/custom".to_string(),
-            querystring: None,
         },
         querystring: vec![],
         headers: vec![
@@ -181,6 +224,17 @@ pub fn test_headers() {
         Header { name: String::from("Cookie"), value: String::from("theme=light") },
         Header { name: String::from("Cookie"), value: String::from("sessionToken=abc123") },
     ]);
+}
+
+
+// endregion
+
+
+// region url
+#[test]
+pub fn test_url() {
+    assert_eq!(hello_http_request().url(), String::from("http://localhost:8000/hello"));
+    assert_eq!(query_http_request().url(), String::from("http://localhost:8000/querystring-params?param1=value1&param2=a%20b"));
 }
 
 

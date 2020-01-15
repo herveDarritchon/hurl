@@ -89,7 +89,7 @@ impl Client {
         let req = client
             .request(
                 request.clone().method.to_reqwest(),
-                reqwest::Url::parse(request.url.to_string().as_str()).unwrap(),
+                reqwest::Url::parse(request.clone().url().as_str()).unwrap(),
             )
             .headers(headers)
             .body(request.clone().body)
@@ -135,7 +135,7 @@ impl Client {
             Err(e) => {
                 return Err(RunnerError::HttpConnection {
                     message: format!("{:?}", e.to_string()),
-                    url: request.url.to_string(),
+                    url: request.clone().url(),
                 });
             }
         }

@@ -26,44 +26,43 @@ pub struct Url {
     pub host: String,
     pub port: Option<u16>,
     pub path: String,
-    pub querystring: Option<String>,
 }
 
 impl Url {
-    pub fn to_string(&self) -> String {
-        let port = match self.port {
-            None => String::from(""),
-            Some(p) => format!(":{}", p),
-        };
-        let mut s = format!("{}://{}{}{}", self.scheme, self.host, port, self.path);
-        match self.clone().querystring {
-            None => {}
-            Some(q) => s.push_str(format!("?{}", q).as_str())
-        }
-        return s;
-    }
+//    pub fn to_string(&self) -> String {
+//        let port = match self.port {
+//            None => String::from(""),
+//            Some(p) => format!(":{}", p),
+//        };
+//        let mut s = format!("{}://{}{}{}", self.scheme, self.host, port, self.path);
+//        match self.clone().querystring {
+//            None => {}
+//            Some(q) => s.push_str(format!("?{}", q).as_str())
+//        }
+//        return s;
+//    }
 
-    pub fn eval(s: String) -> Result<Url, RunnerError> {
-        return match url::Url::parse(s.as_str()) {
-            Err(_) => Err(RunnerError::InvalidURL(s)),
-            Ok(u) => Ok(Url {
-                scheme: u.scheme().to_string(),
-                host: u.host_str().unwrap().to_string(),
-                port: u.port(),
-                path: u.path().to_string(),
-                querystring: match u.query() {
-                    None => None,
-                    Some(s) => Some(s.to_string())
-                },
-            })
-        };
-    }
+//    pub fn eval(s: String) -> Result<Url, RunnerError> {
+//        return match url::Url::parse(s.as_str()) {
+//            Err(_) => Err(RunnerError::InvalidURL(s)),
+//            Ok(u) => Ok(Url {
+//                scheme: u.scheme().to_string(),
+//                host: u.host_str().unwrap().to_string(),
+//                port: u.port(),
+//                path: u.path().to_string(),
+//                querystring: match u.query() {
+//                    None => None,
+//                    Some(s) => Some(s.to_string())
+//                },
+//            })
+//        };
+//    }
 }
 
-#[test]
-fn test_to_string() {
-    assert_eq!(hello_url().to_string(), String::from("http://localhost:8000/hello"))
-}
+//#[test]
+//fn test_to_string() {
+//    assert_eq!(hello_url().to_string(), String::from("http://localhost:8000/hello"))
+//}
 
 
 #[cfg(test)]
@@ -73,7 +72,6 @@ pub fn hello_url() -> Url {
         host: String::from("localhost"),
         port: Some(8000),
         path: String::from("/hello"),
-        querystring: None,
     }
 }
 

@@ -99,19 +99,19 @@ pub fn is_sub_domain(domain1: String, domain2: String) -> bool {
 }
 
 
-#[test]
-fn test_cookie_store() {
-    let mut cookie_jar = CookieStore::init();
-    let url = Url::eval(String::from("http://localhost:8000/hello")).unwrap();
-
-    cookie_jar.add(url.clone(), Cookie::from_str("cookie1=value1;"));
-    cookie_jar.add(url.clone(), Cookie::from_str("cookie1=value1;"));
-    cookie_jar.add(url.clone(), Cookie::from_str("cookie1=value1;"));
-   // assert_eq!(cookie_jar.get_cookies(Url::eval(String::from("http://localhost:8000/hello")).unwrap()).len(), 1);
-
-
-
-}
+//#[test]
+//fn test_cookie_store() {
+//    let mut cookie_jar = CookieStore::init();
+//    let url = Url::eval(String::from("http://localhost:8000/hello")).unwrap();
+//
+//    cookie_jar.add(url.clone(), Cookie::from_str("cookie1=value1;"));
+//    cookie_jar.add(url.clone(), Cookie::from_str("cookie1=value1;"));
+//    cookie_jar.add(url.clone(), Cookie::from_str("cookie1=value1;"));
+//   // assert_eq!(cookie_jar.get_cookies(Url::eval(String::from("http://localhost:8000/hello")).unwrap()).len(), 1);
+//
+//
+//
+//}
 
 
 

@@ -9,7 +9,10 @@ pub trait Textable {
 
 impl Textable for Request {
     fn to_text(&self) -> String {
-        let mut s = format!("{} {}\n", self.method.to_text(), self.url.to_string());
+        let mut s = format!("{} {}\n",
+                            self.clone().method.to_text(),
+                            self.clone().url()
+        );
         for header in self.headers.clone() {
             s.push_str(header.to_text().as_str());
         }
