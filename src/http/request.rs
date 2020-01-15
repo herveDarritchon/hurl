@@ -38,8 +38,24 @@ impl Request {
                 self.headers.push(Header { name, value });
             }
         }
-
     }
+
+    pub fn headers(self) -> Vec<Header> {
+        let mut headers: Vec<Header> = vec![];
+        let user_agent = format!("hurl/{}", clap::crate_version!());
+        let default_headers = vec![
+            (String::from("User-Agent"), user_agent.clone()),
+            (String::from("Host"), String::from(self.url.clone().host))
+        ];
+
+        for (name, value) in default_headers {
+            if !has_header(&self.headers, name.clone()) {
+                headers.push(Header { name, value });
+            }
+        }
+        return headers;
+    }
+
 }
 
 #[cfg(test)]
