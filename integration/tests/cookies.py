@@ -57,3 +57,16 @@ def assert_that_cookie2_is_not_in_session():
 def assert_that_cookie2_is_valuea():
     assert request.cookies['cookie2'] == 'valueA'
     return ''
+
+
+@app.route("/cookies/set-session-cookie2-valueA-subdomain")
+def set_session_cookie2_valuea_subdomain():
+    resp = make_response()
+    resp.set_cookie('cookie2', 'valueA', domain='myshop.orange.localhost')
+    return resp
+
+@app.route("/cookies/set-session-cookie2-valueA-subdomain2")
+def set_session_cookie2_valuea_subdomain2():
+    resp = make_response()
+    resp.set_cookie('cookie2', 'valueA', domain='orange.localhost')
+    return resp

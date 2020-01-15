@@ -76,23 +76,13 @@ impl Request {
 
 
         // headers
-        let user_agent = format!("hurl/{}", clap::crate_version!());
-        let default_headers = vec![
-            (String::from("User-Agent"), user_agent.clone()),
-            (String::from("Host"), String::from(url.clone().host))
-        ];
         let mut headers: Vec<http::core::Header> = vec![];
         for header in self.clone().headers {
             headers.push(header.eval(variables)?);
         }
 
 
-        // add default headers if not present
-        for (name, value) in default_headers {
-            if !has_header(&headers, name.clone()) {
-                headers.push(http::core::Header { name, value });
-            }
-        }
+
 
         // add cookies
         let host = url.host.as_str();
@@ -334,7 +324,9 @@ pub fn test_hello_request() {
     let mut variables = HashMap::new();
     let cookies = HashMap::new();
     variables.insert(String::from("base_url"), String::from("http://localhost:8000"));
-    assert_eq!(hello_request().eval(&variables, &cookies, "current_dir").unwrap(), http::request::hello_http_request());
+    let mut http_request = hello_request().eval(&variables, &cookies, "current_dir").unwrap();
+    http_request.add_default_headers();
+    assert_eq!(http_request, http::request::hello_http_request());
 }
 
 #[test]
@@ -342,7 +334,10 @@ pub fn test_query_request() {
     let mut variables = HashMap::new();
     let cookies = HashMap::new();
     variables.insert(String::from("param1"), String::from("value1"));
-    assert_eq!(query_request().eval(&variables, &cookies, "current_dir").unwrap(), http::request::query_http_request());
+    let mut http_request = query_request().eval(&variables, &cookies, "current_dir").unwrap();
+    http_request.add_default_headers();
+    assert_eq!(http_request, http::request::query_http_request());
+
 }
 
 

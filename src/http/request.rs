@@ -10,10 +10,35 @@ pub struct Request {
     pub body: Vec<u8>,
 }
 
+fn has_header(headers: &Vec<Header>, name: String) -> bool {
+    for header in headers {
+        if header.name == name.to_string() {
+            return true;
+        }
+    }
+    return false;
+}
 
 impl Request {
     pub fn host(self) -> String {
         return self.url.host;
+    }
+
+
+    pub fn add_default_headers(&mut self) {
+        // headers
+        let user_agent = format!("hurl/{}", clap::crate_version!());
+        let default_headers = vec![
+            (String::from("User-Agent"), user_agent.clone()),
+            (String::from("Host"), String::from(self.url.clone().host))
+        ];
+
+        for (name, value) in default_headers {
+            if !has_header(&self.headers, name.clone()) {
+                self.headers.push(Header { name, value });
+            }
+        }
+
     }
 }
 

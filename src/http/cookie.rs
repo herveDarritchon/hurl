@@ -3,6 +3,12 @@ use super::core::*;
 use serde::{Deserialize, Serialize};
 
 
+// cookies
+// keep cookies same name different domains
+// send the most specific?? send the 2 of them?
+// more flexible to keep list of cookies internally
+
+
 pub type Domain = String;
 pub type Name = String;
 
@@ -64,12 +70,32 @@ impl CookieStore {
         return CookieStore { cookies: vec![] };
     }
     fn add(&mut self, url: Url, cookie: Cookie) {
-        self.cookies.push(cookie);
+
+        let domain = match cookie.domain {
+            None => url.host,
+            Some(v) =>  if is_sub_domain(url.host, v.clone()) {
+                v
+            } else {
+                return;
+            }};
+
+        self.cookies.push(Cookie {
+            name: cookie.name,
+            value: cookie.value,
+            max_age: cookie.max_age,
+            domain: Some(domain)
+        });
+
     }
 
     fn get_cookies(self, url: Url) -> Vec<Cookie> {
         return self.cookies;
     }
+}
+
+// is_sub_domain("access.example.com", "example.com")
+pub fn is_sub_domain(domain1: String, domain2: String) -> bool {
+    return domain1.ends_with(domain2.as_str());
 }
 
 
@@ -78,8 +104,13 @@ fn test_cookie_store() {
     let mut cookie_jar = CookieStore::init();
     let url = Url::eval(String::from("http://localhost:8000/hello")).unwrap();
 
-    cookie_jar.add(url, Cookie::from_str("cookie1=value1;"));
+    cookie_jar.add(url.clone(), Cookie::from_str("cookie1=value1;"));
+    cookie_jar.add(url.clone(), Cookie::from_str("cookie1=value1;"));
+    cookie_jar.add(url.clone(), Cookie::from_str("cookie1=value1;"));
     assert_eq!(cookie_jar.get_cookies(Url::eval(String::from("http://localhost:8000/hello")).unwrap()).len(), 1);
+
+
+
 }
 
 
