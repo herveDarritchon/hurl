@@ -1,6 +1,7 @@
-use super::core::*;
-use super::cookie::*;
 use serde::{Deserialize, Serialize};
+
+use super::cookie::*;
+use super::core::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Response {
@@ -68,7 +69,6 @@ impl Response {
         return cookies;
     }
 }
-
 
 
 impl Response {

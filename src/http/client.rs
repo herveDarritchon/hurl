@@ -1,10 +1,9 @@
+// TODO create http-specific error
+use crate::runner::core::RunnerError;
+
 use super::core::*;
 use super::request::*;
 use super::response::*;
-
-
-// TODO create http-specific error
-use crate::runner::core::RunnerError;
 
 pub struct Client {
     inner_client: reqwest::Client,

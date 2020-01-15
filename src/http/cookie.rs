@@ -1,6 +1,6 @@
 use cookie::Cookie as ExternalCookie;
-use super::core::*;
 
+use super::core::*;
 
 // cookies
 // keep cookies same name different domains
@@ -45,7 +45,7 @@ impl Cookie {
     pub fn to_header(&self) -> Header {
         return Header {
             name: String::from("Cookie"),
-            value: self.to_string()
+            value: self.to_string(),
         };
         //format!("Cookie: {}", self.to_string());
     }
@@ -69,22 +69,21 @@ impl CookieStore {
         return CookieStore { cookies: vec![] };
     }
     fn add(&mut self, url: Url, cookie: Cookie) {
-
         let domain = match cookie.domain {
             None => url.host,
-            Some(v) =>  if is_sub_domain(url.host, v.clone()) {
+            Some(v) => if is_sub_domain(url.host, v.clone()) {
                 v
             } else {
                 return;
-            }};
+            }
+        };
 
         self.cookies.push(Cookie {
             name: cookie.name,
             value: cookie.value,
             max_age: cookie.max_age,
-            domain: Some(domain)
+            domain: Some(domain),
         });
-
     }
 
     fn get_cookies(self, url: Url) -> Vec<Cookie> {
@@ -111,8 +110,6 @@ pub fn is_sub_domain(domain1: String, domain2: String) -> bool {
 //
 //
 //}
-
-
 
 
 //

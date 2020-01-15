@@ -1,11 +1,8 @@
-use super::core::*;
-use super::cookie::*;
+use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
 use serde::{Deserialize, Serialize};
 
-use percent_encoding::{utf8_percent_encode, AsciiSet, CONTROLS};
-
-
-
+use super::cookie::*;
+use super::core::*;
 
 const FRAGMENT: &AsciiSet = &CONTROLS
     .add(b' ')
@@ -44,13 +41,12 @@ impl Request {
     }
 
     pub fn url(self) -> String {
-        let port =  match self.url.port {
+        let port = match self.url.port {
             None => String::from(""),
             Some(p) => format!(":{}", p)
         };
         let querystring = if self.querystring.is_empty() {
-              String::from("")
-
+            String::from("")
         } else {
             let mut buf = String::from("");
             for param in self.querystring {
@@ -88,7 +84,7 @@ impl Request {
         for cookie in self.cookies {
             headers.push(Header {
                 name: String::from("Cookie"),
-                value: cookie.to_string()
+                value: cookie.to_string(),
             });
         }
         return headers;
@@ -211,7 +207,6 @@ impl Method {
 // region headers
 #[test]
 pub fn test_headers() {
-    
     assert_eq!(hello_http_request().headers(), vec![
         Header { name: String::from("User-Agent"), value: format!("hurl/{}", clap::crate_version!()) },
         Header { name: String::from("Host"), value: String::from("localhost") }

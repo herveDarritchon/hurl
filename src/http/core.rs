@@ -1,9 +1,9 @@
+extern crate reqwest;
+
+use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
 use serde::{Deserialize, Serialize};
 
 use crate::runner::core::RunnerError;
-use percent_encoding::{utf8_percent_encode, AsciiSet, CONTROLS};
-
-extern crate reqwest;
 
 
 const FRAGMENT: &AsciiSet = &CONTROLS
@@ -103,7 +103,6 @@ pub struct Param {
     pub name: String,
     pub value: String,
 }
-
 
 
 // region add_query_param
