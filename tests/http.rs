@@ -21,10 +21,12 @@ fn test_hello() {
             querystring: None
         }, //"http://localhost:8000/hello".to_string(),
         //querystring_params: vec![],
+        querystring: vec![],
         headers: vec![
             http::core::Header { name: String::from("User-Agent"), value: String::from("hurl/0.1.1") },
             http::core::Header { name: String::from("Host"), value: String::from("TBD") }
         ],
+        cookies: vec![],
         body: vec![],
     };
 
@@ -69,8 +71,9 @@ fn hello_request() -> http::request::Request {
             path: "/hello".to_string(),
             querystring: None
         }, //"http://localhost:8000/hello".to_string(),
-        //querystring_params: vec![],
+        querystring: vec![],
         headers: vec![],
+        cookies: vec![],
         body: vec![],
     }
 }
@@ -110,10 +113,12 @@ fn test_send_cookie() {
             path: "/cookies/set-request-cookie1-valueA".to_string(),
             querystring: None
         }, //"http://localhost:8000/send-cookie".to_string(),
+        querystring: vec![],
         headers: vec![http::core::Header {
             name: "Cookie".to_string(),
             value: "cookie1=valueA;".to_string(),
         }],
+        cookies: vec![],
         body: vec![],
     };
     let response = client.execute(&request).unwrap();
@@ -151,7 +156,9 @@ fn test_redirect() {
             path: "/redirect".to_string(),
             querystring: None
         }, // "http://localhost:8000/redirect".to_string(),
+        querystring: vec![],
         headers: vec![],
+        cookies: vec![],
         body: vec![],
     };
     let response = client.execute(&request).unwrap();
@@ -175,7 +182,9 @@ fn test_querystring_param() {
             path: "/querystring-params".to_string(),
             querystring: Some(String::from("param1=value1&param2&param3=a%3db"))
         },
+        querystring: vec![],
         headers: vec![],
+        cookies: vec![],
         body: vec![],
     };
     let response = client.execute(&request).unwrap();
@@ -196,11 +205,12 @@ fn test_form_param() {
             path: "/form-params".to_string(),
             querystring: None
         }, // "http://localhost:8000/form-params".to_string(),
-        //querystring_params: vec![],
+        querystring: vec![],
         headers: vec![http::core::Header {
             name: "Content-Type".to_string(),
             value: "application/x-www-form-urlencoded".to_string(),
         }],
+        cookies: vec![],
         body: "param1=value1&param2=".to_string().into_bytes(),
     };
     let response = client.execute(&request).unwrap();

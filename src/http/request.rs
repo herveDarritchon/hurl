@@ -1,12 +1,16 @@
 use super::core::*;
+use super::cookie::*;
 use serde::{Deserialize, Serialize};
+
 
 // region request
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Request {
     pub method: Method,
     pub url: Url,
+    pub querystring: Vec<Param>,
     pub headers: Vec<Header>,
+    pub cookies: Vec<Cookie>,
     pub body: Vec<u8>,
 }
 
@@ -24,24 +28,8 @@ impl Request {
         return self.url.host;
     }
 
-
-    pub fn add_default_headers(&mut self) {
-        // headers
-        let user_agent = format!("hurl/{}", clap::crate_version!());
-        let default_headers = vec![
-            (String::from("User-Agent"), user_agent.clone()),
-            (String::from("Host"), String::from(self.url.clone().host))
-        ];
-
-        for (name, value) in default_headers {
-            if !has_header(&self.headers, name.clone()) {
-                self.headers.push(Header { name, value });
-            }
-        }
-    }
-
     pub fn headers(self) -> Vec<Header> {
-        let mut headers: Vec<Header> = vec![];
+        let mut headers: Vec<Header> = self.headers.clone();
         let user_agent = format!("hurl/{}", clap::crate_version!());
         let default_headers = vec![
             (String::from("User-Agent"), user_agent.clone()),
@@ -53,9 +41,15 @@ impl Request {
                 headers.push(Header { name, value });
             }
         }
+
+        for cookie in self.cookies {
+            headers.push(Header {
+                name: String::from("Cookie"),
+                value: cookie.to_string()
+            });
+        }
         return headers;
     }
-
 }
 
 #[cfg(test)]
@@ -69,12 +63,9 @@ pub fn hello_http_request() -> Request {
             path: "/hello".to_string(),
             querystring: None,
         },
-        //String::from("http://localhost:8000/hello"),
-
-        headers: vec![
-            Header { name: String::from("User-Agent"), value: format!("hurl/{}", clap::crate_version!()) },
-            Header { name: String::from("Host"), value: String::from("localhost") }
-        ],
+        querystring: vec![],
+        headers: vec![],
+        cookies: vec![],
         body: vec![],
     };
 }
@@ -97,9 +88,46 @@ pub fn query_http_request() -> Request {
 //            Param { name: String::from("param1"), value: String::from("value1") },
 //            Param { name: String::from("param2"), value: String::from("") }
 //        ],
+        querystring: vec![],
         headers: vec![
-            Header { name: String::from("User-Agent"), value: format!("hurl/{}", clap::crate_version!()) },
-            Header { name: String::from("Host"), value: String::from("localhost") }
+//            Header { name: String::from("User-Agent"), value: format!("hurl/{}", clap::crate_version!()) },
+//            Header { name: String::from("Host"), value: String::from("localhost") }
+        ],
+        cookies: vec![],
+        body: vec![],
+    };
+}
+
+
+#[cfg(test)]
+pub fn custom_http_request() -> Request {
+    return Request {
+        method: Method::Get,
+        url: Url {
+            scheme: "http".to_string(),
+            host: "localhost".to_string(),
+            port: None,
+            path: "/custom".to_string(),
+            querystring: None,
+        },
+        querystring: vec![],
+        headers: vec![
+            Header { name: String::from("User-Agent"), value: String::from("iPhone") },
+            Header { name: String::from("Foo"), value: String::from("Bar") },
+        ],
+        cookies: vec![
+            Cookie {
+                name: String::from("theme"),
+                value: String::from("light"),
+                max_age: None,
+                domain: None,
+            },
+            Cookie {
+                name: String::from("sessionToken"),
+                value: String::from("abc123"),
+                max_age: None,
+                domain: None,
+            }
         ],
         body: vec![],
     };
@@ -134,4 +162,26 @@ impl Method {
         };
     }
 }
+// endregion
+
+
+// region headers
+#[test]
+pub fn test_headers() {
+    
+    assert_eq!(hello_http_request().headers(), vec![
+        Header { name: String::from("User-Agent"), value: format!("hurl/{}", clap::crate_version!()) },
+        Header { name: String::from("Host"), value: String::from("localhost") }
+    ]);
+
+    assert_eq!(custom_http_request().headers(), vec![
+        Header { name: String::from("User-Agent"), value: String::from("iPhone") },
+        Header { name: String::from("Foo"), value: String::from("Bar") },
+        Header { name: String::from("Host"), value: String::from("localhost") },
+        Header { name: String::from("Cookie"), value: String::from("theme=light") },
+        Header { name: String::from("Cookie"), value: String::from("sessionToken=abc123") },
+    ]);
+}
+
+
 // endregion

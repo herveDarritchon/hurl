@@ -145,7 +145,9 @@ impl Request {
         let request = http::request::Request {
             method: self.method.eval(),
             url,
+            querystring: vec![],
             headers,
+            cookies: vec![],
             body: bytes,
         };
         return Ok(request);
@@ -325,7 +327,6 @@ pub fn test_hello_request() {
     let cookies = HashMap::new();
     variables.insert(String::from("base_url"), String::from("http://localhost:8000"));
     let mut http_request = hello_request().eval(&variables, &cookies, "current_dir").unwrap();
-    http_request.add_default_headers();
     assert_eq!(http_request, http::request::hello_http_request());
 }
 
@@ -335,7 +336,6 @@ pub fn test_query_request() {
     let cookies = HashMap::new();
     variables.insert(String::from("param1"), String::from("value1"));
     let mut http_request = query_request().eval(&variables, &cookies, "current_dir").unwrap();
-    http_request.add_default_headers();
     assert_eq!(http_request, http::request::query_http_request());
 
 }
