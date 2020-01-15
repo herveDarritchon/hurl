@@ -2,7 +2,7 @@ use super::core::*;
 use super::cookie::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Response {
     pub version: Version,
     pub status: u16,
@@ -10,7 +10,7 @@ pub struct Response {
     pub body: Vec<u8>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Version {
     Http10,
     Http11,

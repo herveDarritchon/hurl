@@ -80,6 +80,37 @@ impl Serialize for http::cookie::Cookie {
     }
 }
 
+impl Serialize for http::response::Response {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+    {
+        // 3 is the number of fields in the struct.
+        let mut state = serializer.serialize_struct("??", 3)?;
+        state.serialize_field("httpVersion", &self.clone().version)?;
+        state.serialize_field("status", &self.clone().status)?;
+        state.serialize_field("cookies", &self.clone().cookies())?;
+        state.serialize_field("headers", &self.clone().headers)?;
+
+        state.end()
+    }
+}
+
+impl Serialize for http::response::Version {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+    {
+
+        match self {
+            http::response::Version::Http10 =>  serializer.serialize_str("HTTP/1.0"),
+            http::response::Version::Http11 =>  serializer.serialize_str("HTTP/1.1"),
+            http::response::Version::Http2 =>  serializer.serialize_str("HTTP/2"),
+        }
+    }
+}
+
+
 //#[derive(Clone, Debug, PartialEq, Eq,Serialize, Deserialize)]
 //#[derive(Clone, Debug, PartialEq, Eq)]
 //pub struct EntryLog {
