@@ -5,12 +5,11 @@ use serde::{Deserialize, Serialize};
 use crate::core::core::{SourceInfo, Value};
 
 use super::core::{Error, RunnerError};
-//use super::http;
-use super::predicate::PredicateResult;
+
 #[cfg(test)]
 use super::query;
 use super::super::core::ast::*;
-
+use super::core::*;
 use crate::http;
 
 //#[cfg(test)]
@@ -20,13 +19,7 @@ use crate::http;
 //use crate::runner::core::{RunnerError};
 
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub enum AssertResult {
-    Version { actual: String, expected: String, source_info: SourceInfo },
-    Status { actual: u64, expected: u64, source_info: SourceInfo },
-    Header { actual: Result<String,Error> , expected: String,  source_info: SourceInfo  },
-    Explicit { actual: Result<Value,Error>, source_info: SourceInfo, predicate_result: Option<PredicateResult> },
-}
+
 
 impl AssertResult {
     pub fn fail(self) -> bool {

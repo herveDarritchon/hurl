@@ -9,7 +9,8 @@ use crate::core::core::Value;
 use super::core::{Error, RunnerError};
 use super::super::core::ast::*;
 
-pub type PredicateResult = Result<(), Error>;
+use super::core::*;
+
 
 // equals 10         function  return ()
 // not equals 10

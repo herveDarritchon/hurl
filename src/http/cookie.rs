@@ -1,6 +1,5 @@
 use cookie::Cookie as ExternalCookie;
 use super::core::*;
-use serde::{Deserialize, Serialize};
 
 
 // cookies
@@ -60,7 +59,7 @@ impl Cookie {
 }
 
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct CookieStore {
     cookies: Vec<Cookie>
 }

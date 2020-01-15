@@ -1,114 +1,22 @@
 use std::collections::HashMap;
-
-use serde::Serialize;
-//use serde::ser::SerializeStruct;
-
 use crate::core::ast::*;
 use crate::core::core::SourceInfo;
 use crate::core::core::Value;
 
-use super::assert::AssertResult;
 use super::core::Error;
 use crate::http;
 use super::text::*;
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
-pub struct RequestLog {
-    url: String,
-}
-
-//pub type EntryResult = Result<EntryLog, Error>;
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct EntryResult {
-    pub request: Option<http::request::Request>,
-    pub request2: Option<RequestLog>,
-    pub response: Option<http::response::Response>,
-    pub captures: Vec<(String, Value)>,
-    pub asserts: Vec<AssertResult>,
-    pub errors: Vec<Error>,
-}
+use super::core::*;
 
 
 
-// Custom serialization for entry
-use serde::ser::{ Serializer, SerializeStruct};
 
-impl Serialize for EntryResult {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-    {
-        // 3 is the number of fields in the struct.
-        let mut state = serializer.serialize_struct("Color", 3)?;
-        state.serialize_field("request", &self.request)?;
-        state.serialize_field("response", &self.response)?;
-        state.serialize_field("captures", &self.captures)?;
-        state.serialize_field("asserts", &self.asserts)?;
 
-        state.end()
-    }
-}
 
-impl Serialize for http::request::Request {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-    {
-        // 3 is the number of fields in the struct.
-        let mut state = serializer.serialize_struct("??", 3)?;
-        state.serialize_field("url", &self.clone().url())?;
-        state.serialize_field("queryString", &self.clone().querystring)?;
-        state.serialize_field("headers", &self.clone().headers())?;
-        state.serialize_field("cookies", &self.clone().cookies)?;
-        state.end()
-    }
-}
 
-impl Serialize for http::cookie::Cookie {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-    {
-        // 3 is the number of fields in the struct.
-        let mut state = serializer.serialize_struct("??", 3)?;
-        state.serialize_field("name", &self.clone().name)?;
-        state.serialize_field("value", &self.clone().value)?;
-        if let Some(value) = self.clone().domain {
-            state.serialize_field("domain", &value)?;
-        }
-        state.end()
-    }
-}
 
-impl Serialize for http::response::Response {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-    {
-        // 3 is the number of fields in the struct.
-        let mut state = serializer.serialize_struct("??", 3)?;
-        state.serialize_field("httpVersion", &self.clone().version)?;
-        state.serialize_field("status", &self.clone().status)?;
-        state.serialize_field("cookies", &self.clone().cookies())?;
-        state.serialize_field("headers", &self.clone().headers)?;
 
-        state.end()
-    }
-}
 
-impl Serialize for http::response::Version {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-    {
-
-        match self {
-            http::response::Version::Http10 =>  serializer.serialize_str("HTTP/1.0"),
-            http::response::Version::Http11 =>  serializer.serialize_str("HTTP/1.1"),
-            http::response::Version::Http2 =>  serializer.serialize_str("HTTP/2"),
-        }
-    }
-}
 
 
 //#[derive(Clone, Debug, PartialEq, Eq,Serialize, Deserialize)]
@@ -167,7 +75,6 @@ impl Entry {
             Err(error) => {
                 return EntryResult {
                     request: None,
-                    request2: None,
                     response: None,
                     captures: vec![],
                     asserts: vec![],
@@ -186,7 +93,6 @@ impl Entry {
             Err(e) => {
                 return EntryResult {
                     request: Some(http_request),
-                    request2: None,
                     response: None,
                     captures: vec![],
                     asserts: vec![],
@@ -215,7 +121,6 @@ impl Entry {
                 Err(e) => {
                     return EntryResult {
                         request: Some(http_request.clone()),
-                        request2: None,
                         response: Some(http_response.clone()),
                         captures: vec![],
                         asserts: vec![],
@@ -290,7 +195,6 @@ impl Entry {
 
         return EntryResult {
             request: Some(http_request),
-            request2: None,
             response: Some(http_response),
             captures,
             asserts,

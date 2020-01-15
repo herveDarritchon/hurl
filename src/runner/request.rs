@@ -14,21 +14,6 @@ use super::super::core::ast::*;
 use crate::http;
 
 
-use percent_encoding::{utf8_percent_encode, AsciiSet, CONTROLS};
-
-
-const FRAGMENT: &AsciiSet = &CONTROLS
-    .add(b' ')
-    .add(b'"')
-    .add(b':')
-    .add(b'/')
-    .add(b'<')
-    .add(b'>')
-    .add(b'+')
-    .add(b'=')
-    .add(b'`');
-
-
 fn has_header(headers: &Vec<http::core::Header>, name: String) -> bool {
     for header in headers {
         if header.name == name.to_string() {

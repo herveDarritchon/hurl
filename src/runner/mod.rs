@@ -10,5 +10,5 @@ pub mod assert;
 pub mod predicate;
 pub mod template;
 pub mod response;
-
+pub mod log;
 mod xpath;

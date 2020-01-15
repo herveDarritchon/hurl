@@ -12,23 +12,18 @@ use super::super::core::ast::*;
 
 #[cfg(test)]
 use self::super::assert;
-use self::super::assert::AssertResult;
 #[cfg(test)]
 use self::super::capture;
 
 use crate::http;
 use crate::runner::text::Textable;
+use super::core::*;
 
 //#[cfg(test)]
 //use crate::core::core::{SourceInfo};
 
-pub type ResponseResult = Result<ResponseLog, Error>;
+//pub type ResponseResult = Result<ResponseLog, Error>;
 
-pub struct ResponseLog {
-    //value: http::Response,
-    _captures: Vec<(String, Value)>,
-    _asserts: Vec<AssertResult>,
-}
 
 
 impl Response {

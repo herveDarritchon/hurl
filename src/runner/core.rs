@@ -1,5 +1,44 @@
 use crate::core::core::{FormatError, SourceInfo, Value};
 use serde::{Deserialize, Serialize};
+use crate::http;
+
+//region result
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct HurlResult {
+    pub filename: String,
+    pub entries: Vec<EntryResult>,
+}
+
+impl HurlResult {
+    pub fn errors(self) -> Vec<Error> {
+        return self.entries.iter().flat_map(|e| e.errors.clone()).collect();
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct EntryResult {
+    pub request: Option<http::request::Request>,
+    pub response: Option<http::response::Response>,
+    pub captures: Vec<(String, Value)>,
+    pub asserts: Vec<AssertResult>,
+    pub errors: Vec<Error>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum AssertResult {
+    Version { actual: String, expected: String, source_info: SourceInfo },
+    Status { actual: u64, expected: u64, source_info: SourceInfo },
+    Header { actual: Result<String,Error> , expected: String,  source_info: SourceInfo  },
+    Explicit { actual: Result<Value,Error>, source_info: SourceInfo, predicate_result: Option<PredicateResult> },
+}
+
+pub type PredicateResult = Result<(), Error>;
+
+// endregion
+
+
+// region error
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Error {
@@ -91,3 +130,5 @@ impl FormatError for Error {
         };
     }
 }
+
+// endregion

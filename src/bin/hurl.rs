@@ -11,7 +11,7 @@ use atty::Stream;
 use hurl::core::core::FormatError;
 use hurl::parser;
 use hurl::runner;
-use hurl::runner::runner::HurlResult;
+use hurl::runner::core::*;
 use hurl::http;
 
 fn execute(filename: &str,

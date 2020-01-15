@@ -1,27 +1,16 @@
 use std::collections::HashMap;
 
-use serde::Serialize;
 
 use crate::core::ast::*;
 use crate::core::core::FormatError;
-use super::core::Error;
-use super::entry::EntryResult;
-//use crate::http::request::*;
-//use crate::http::response::*;
+use super::core::*;
 use crate::http::client::*;
 use super::super::format;
+use super::log::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
-pub struct HurlResult {
-    pub filename: String,
-    pub entries: Vec<EntryResult>,
-}
 
-impl HurlResult {
-    pub fn errors(self) -> Vec<Error> {
-        return self.entries.iter().flat_map(|e| e.errors.clone()).collect();
-    }
-}
+
+
 
 
 pub fn run(
