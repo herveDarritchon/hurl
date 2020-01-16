@@ -91,7 +91,27 @@ impl Request {
     }
 
     pub fn add_session_cookies(&mut self, cookies: Vec<Cookie>) {
-        eprintln!("add session cookies {:?}", cookies);
+        //eprintln!("add session cookies {:?}", cookies);
+        for cookie in cookies {
+            match self.clone().get_cookie(cookie.clone().name) {
+                Some(Cookie { domain,.. }) => {
+                    if domain != cookie.domain {
+                        self.cookies.push(cookie.clone());
+                    }
+                },
+                _ => {self.cookies.push(cookie.clone());}
+            }
+        }
+    }
+
+
+    pub fn get_cookie(self, name: String) -> Option<Cookie> {
+        for cookie in self.cookies {
+            if cookie.name == name {
+                return Some(cookie);
+            }
+        }
+        return None;
     }
 }
 

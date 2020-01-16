@@ -12,6 +12,7 @@ use hurl::core::ast::HurlString;
 // can be used for debugging
 #[test]
 fn test_hurl_file() {
+    let mut cookie_store = http::cookie::CookieStore::init();
     let filename = "integration/tests/cookies.hurl";
     //let filename = "/mnt/secure/repos/work/myshop/integration/src/main/hurl-generated/pcm/pcm-jdd-open-up-150go.hurl";
     let content = std::fs::read_to_string(filename).expect("Something went wrong reading the file");
@@ -40,6 +41,7 @@ fn test_hurl_file() {
         filename.to_string(),
         false,
         lines,
+        &mut cookie_store
     );
     //assert_eq!(1,2)
 
@@ -113,6 +115,7 @@ fn hello_request() -> ast::Request {
 
 #[test]
 fn test_hello() {
+    let mut cookie_store = http::cookie::CookieStore::init();
     let client = http::client::Client::init(http::client::ClientOptions {
         noproxy_hosts: vec![],
         insecure: false,
@@ -167,7 +170,8 @@ fn test_hello() {
         "current_dir",
         String::from("filename"),
         true,
-        lines
+        lines,
+        &mut cookie_store
     );
     //assert_eq!(hurl_log.entries.len(), 1);
     //assert_eq!(hurl_log.entries.get(0).unwrap().response.status, 200);

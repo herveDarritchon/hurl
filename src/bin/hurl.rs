@@ -44,6 +44,7 @@ fn execute(filename: &str,
     // edd an empty line at the end?
     lines.push("");
 
+    let mut cookie_store = http::cookie::CookieStore::init();
     let mut parser = parser::core::Parser::init(contents.as_str());
     match parser::parser::hurl_file(&mut parser) {
         Err(e) => {
@@ -91,6 +92,7 @@ fn execute(filename: &str,
                                                   filename.to_string(),
                                                   output_color,
                                                   lines.clone(),
+                                                  &mut cookie_store
             );
             return hurl_result;
         }

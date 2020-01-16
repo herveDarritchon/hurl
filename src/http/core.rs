@@ -3,7 +3,7 @@ extern crate reqwest;
 use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
 use serde::{Deserialize, Serialize};
 
-use crate::runner::core::RunnerError;
+//use crate::runner::core::RunnerError;
 
 
 const FRAGMENT: &AsciiSet = &CONTROLS

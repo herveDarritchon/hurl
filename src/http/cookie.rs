@@ -69,13 +69,13 @@ pub struct CookieStore {
 
 
 impl CookieStore {
-    fn init() -> CookieStore {
+    pub fn init() -> CookieStore {
         return CookieStore { inner: HashMap::new() };
     }
 
     // TODO - add check
     // TODO - add delete with Max-Age
-    fn update(&mut self, domain: Domain, cookie: Cookie) {
+   pub fn update(&mut self, domain: Domain, cookie: Cookie) {
 //        let domain = match cookie.domain {
 //            None => url.host,
 //            Some(v) => if is_sub_domain(url.host, v.clone()) {
@@ -99,13 +99,21 @@ impl CookieStore {
                 v.clone()
              }
          };
-        domain_cookies.push(cookie);
+        match cookie.max_age {
+            Some(0) => {
+                domain_cookies.retain(|c| c.name != cookie.name );
+            },
+            _ => {
+                domain_cookies.push(cookie);
+            }
+        }
+
         self.inner.insert(domain, domain_cookies);
 
     }
 
     // TODO - add check
-    fn get_cookies(self, domain: Domain) -> Vec<Cookie> {
+    pub fn get_cookies(self, domain: Domain) -> Vec<Cookie> {
         return match self.inner.get(domain.as_str()) {
             None => vec![],
             Some(v)=> v.clone()
@@ -119,9 +127,9 @@ pub fn is_sub_domain(domain1: String, domain2: String) -> bool {
 }
 
 
-//#[test]
-//fn test_cookie_store() {
-//    let mut cookie_jar = CookieStore::init();
+#[test]
+fn test_cookie_store() {
+     let mut cookie_store = CookieStore::init();
 //    let url = Url::eval(String::from("http://localhost:8000/hello")).unwrap();
 //
 //    cookie_jar.add(url.clone(), Cookie::from_str("cookie1=value1;"));
@@ -131,7 +139,7 @@ pub fn is_sub_domain(domain1: String, domain2: String) -> bool {
 //
 //
 //
-//}
+}
 
 
 //

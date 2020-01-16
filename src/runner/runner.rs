@@ -2,14 +2,14 @@ use std::collections::HashMap;
 
 use crate::core::ast::*;
 use crate::core::core::FormatError;
-use crate::http::client::*;
+use crate::http;
 
 use super::core::*;
 //use super::log::*;
 use super::super::format;
 
 pub fn run(
-    http_client: Client,
+    http_client: http::client::Client,
     hurl_file: HurlFile,
     fail_fast: bool,
     init_variables: &HashMap<String, String>,
@@ -18,10 +18,11 @@ pub fn run(
     filename: String,
     output_color: bool,
     lines: Vec<String>,
+    cookie_store: &mut http::cookie::CookieStore
 ) -> HurlResult {
     let mut entries = vec![];
     let mut variables = HashMap::new();
-    let mut all_cookies = HashMap::new();
+
     for (key, value) in init_variables {
         variables.insert(key.to_string(), value.to_string());
     }
@@ -29,7 +30,7 @@ pub fn run(
     //let mut variables = variables;
     for entry in hurl_file.entries {
         // eprintln!(">> entry");
-        let entry_result = entry.eval(&http_client, &mut variables, &mut all_cookies, verbose, context_dir);
+        let entry_result = entry.eval(&http_client, &mut variables, cookie_store, verbose, context_dir);
         entries.push(entry_result.clone());
         for e in entry_result.errors.clone() {
             let error = format::error::Error {

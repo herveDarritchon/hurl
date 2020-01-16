@@ -1,5 +1,3 @@
-use serde::{Deserialize, Serialize};
-
 use super::cookie::*;
 use super::core::*;
 

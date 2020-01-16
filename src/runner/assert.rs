@@ -2,8 +2,7 @@
 //use crate::core::core::Pos;
 use std::collections::HashMap;
 
-use serde::{Deserialize, Serialize};
-
+#[cfg(test)]
 use crate::core::core::{SourceInfo, Value};
 use crate::http;
 

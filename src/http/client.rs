@@ -1,5 +1,5 @@
 // TODO create http-specific error
-use crate::runner::core::RunnerError;
+//use crate::runner::core::RunnerError;
 
 use super::core::*;
 use super::request::*;
@@ -14,6 +14,12 @@ pub struct Client {
 pub struct ClientOptions {
     pub noproxy_hosts: Vec<String>,
     pub insecure: bool,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct HttpError {
+    pub url: String,
+    pub message: String
 }
 
 
@@ -41,7 +47,7 @@ impl Client {
     }
 
     //pub fn execute(&self, request: &Request) -> Result<Response, Error> {
-    pub fn execute(&self, request: &Request) -> Result<Response, RunnerError> {
+    pub fn execute(&self, request: &Request) -> Result<Response, HttpError> {
         let mut headers = reqwest::header::HeaderMap::new();
         for header in request.clone().headers() {
             headers.insert(
@@ -132,7 +138,7 @@ impl Client {
                 });
             }
             Err(e) => {
-                return Err(RunnerError::HttpConnection {
+                return Err(HttpError {
                     message: format!("{:?}", e.to_string()),
                     url: request.clone().url(),
                 });

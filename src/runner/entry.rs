@@ -2,12 +2,13 @@ use std::collections::HashMap;
 
 use crate::core::ast::*;
 use crate::core::core::SourceInfo;
-use crate::core::core::Value;
+//use crate::core::core::Value;
 use crate::http;
 
 use super::core::*;
-use super::core::Error;
+use super::core::{Error, RunnerError};
 use super::text::*;
+use crate::http::cookie::CookieStore;
 
 
 // cookies
@@ -19,14 +20,14 @@ use super::text::*;
 impl Entry {
     pub fn eval(self, http_client: &http::client::Client,
                 variables: &mut HashMap<String, String>,
-                all_cookies: &mut HashMap<http::cookie::Domain, HashMap<http::cookie::Name, http::cookie::Cookie>>,
+                cookie_store: &mut CookieStore,
                 verbose: bool,
                 context_dir: &str,
     ) -> EntryResult {
 
         //let mut entry_log_builder = EntryLogBuilder::init();
 
-        let mut http_request = match self.clone().request.eval(variables, all_cookies, context_dir) {
+        let mut http_request = match self.clone().request.eval(variables, context_dir) {
             Ok(r) => r,
             Err(error) => {
                 return EntryResult {
@@ -38,7 +39,7 @@ impl Entry {
                 };
             }
         };
-        http_request.add_session_cookies(vec![]);
+        http_request.add_session_cookies(cookie_store.clone().get_cookies(http_request.clone().host()));
 
         if verbose {
             eprintln!("---------------------------------------------------------------------------------------------------");
@@ -60,7 +61,10 @@ impl Entry {
                                 start: self.clone().request.url.source_info.start,
                                 end: self.clone().request.url.source_info.end,
                             },
-                            inner: e,
+                            inner: RunnerError::HttpConnection {
+                                message: e.message,
+                                url: e.url,
+                            },
                             assert: false,
                         }],
                 };
@@ -108,11 +112,8 @@ impl Entry {
 
         // update cookies
         // for the domain
-        let host = http_request.clone().host();
-        let mut cookies: HashMap<http::cookie::Name, http::cookie::Cookie> = match all_cookies.get(&host) {
-            None => HashMap::new(),
-            Some(v) => v.clone(),
-        };
+        let domain = http_request.clone().host();
+        //let mut cookies = cookie_store.get_cookies(host);
 
 
         for cookie in http_response.cookies() {
@@ -124,25 +125,26 @@ impl Entry {
 //                };
 //                //eprintln!("[DEBUG] cookie {}={}{}", cookie.name, cookie.value, max_age);
 //            }
-
-            match cookie.max_age {
-                Some(0) => {
-                    cookies.remove(cookie.clone().name.as_str());
-                    //eprintln!(">>> cookies={:?}", cookies);
-                }
-                _ => {
-                    cookies.insert(cookie.clone().name, cookie);
-                }
-            }
+            cookie_store.update(domain.clone(), cookie);
+//            match cookie.max_age {
+//                Some(0) => {
+//
+//                   // cookies.remove(cookie.clone().name.as_str());
+//                    //eprintln!(">>> cookies={:?}", cookies);
+//                }
+//                _ => {
+//                    //cookies.insert(cookie.clone().name, cookie);
+//                }
+//            }
         }
         if verbose {
-            eprintln!("[DEBUG] Cookies for {}", host);
-            for (_, cookie) in cookies.clone() {
+            eprintln!("[DEBUG] Cookies for {}", domain);
+            for cookie in cookie_store.clone().get_cookies(domain) {
                 eprintln!("[DEBUG] {}", cookie.to_string());
             }
         }
 
-        all_cookies.insert(host, cookies.clone());
+
 
         return EntryResult {
             request: Some(http_request),

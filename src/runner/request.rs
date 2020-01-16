@@ -14,20 +14,19 @@ use super::super::core::ast::*;
 
 //use super::core::*;
 
-fn has_header(headers: &Vec<http::core::Header>, name: String) -> bool {
-    for header in headers {
-        if header.name == name.to_string() {
-            return true;
-        }
-    }
-    return false;
-}
+//fn has_header(headers: &Vec<http::core::Header>, name: String) -> bool {
+//    for header in headers {
+//        if header.name == name.to_string() {
+//            return true;
+//        }
+//    }
+//    return false;
+//}
 
 // region request
 impl Request {
     pub fn eval(self,
                 variables: &HashMap<String, String>,
-                all_cookies: &HashMap<http::cookie::Domain, HashMap<http::cookie::Name, http::cookie::Cookie>>,
                 context_dir: &str,
     )
                 -> Result<http::request::Request, Error> {
@@ -97,7 +96,7 @@ impl Request {
 
 
         // add cookies
-        let host = url.host.as_str();
+        //let host = url.host.as_str();
         let mut cookies = vec![];
 //        let mut cookies: HashMap<http::cookie::Name, http::cookie::Cookie> = match all_cookies.get(host) {
 //            None => HashMap::new(),
@@ -328,8 +327,7 @@ pub fn query_request() -> Request {
 #[test]
 pub fn test_error_variable() {
     let variables = HashMap::new();
-    let cookies = HashMap::new();
-    let error = hello_request().eval(&variables, &cookies, "current_dir").err().unwrap();
+    let error = hello_request().eval(&variables, "current_dir").err().unwrap();
     assert_eq!(error.source_info, SourceInfo::init(1, 7, 1, 15));
     assert_eq!(error.inner, RunnerError::TemplateVariableNotDefined { name: String::from("base_url") });
 }
@@ -337,18 +335,18 @@ pub fn test_error_variable() {
 #[test]
 pub fn test_hello_request() {
     let mut variables = HashMap::new();
-    let cookies = HashMap::new();
+   // let cookies = HashMap::new();
     variables.insert(String::from("base_url"), String::from("http://localhost:8000"));
-    let mut http_request = hello_request().eval(&variables, &cookies, "current_dir").unwrap();
+    let mut http_request = hello_request().eval(&variables, "current_dir").unwrap();
     assert_eq!(http_request, http::request::hello_http_request());
 }
 
 #[test]
 pub fn test_query_request() {
     let mut variables = HashMap::new();
-    let cookies = HashMap::new();
+    //let cookies = HashMap::new();
     variables.insert(String::from("param1"), String::from("value1"));
-    let mut http_request = query_request().eval(&variables, &cookies, "current_dir").unwrap();
+    let mut http_request = query_request().eval(&variables, "current_dir").unwrap();
     assert_eq!(http_request, http::request::query_http_request());
 }
 
