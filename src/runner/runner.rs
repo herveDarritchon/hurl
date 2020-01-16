@@ -5,7 +5,7 @@ use crate::core::core::FormatError;
 use crate::http::client::*;
 
 use super::core::*;
-use super::log::*;
+//use super::log::*;
 use super::super::format;
 
 pub fn run(

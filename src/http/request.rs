@@ -89,6 +89,10 @@ impl Request {
         }
         return headers;
     }
+
+    pub fn add_session_cookies(&mut self, cookies: Vec<Cookie>) {
+        eprintln!("add session cookies {:?}", cookies);
+    }
 }
 
 #[cfg(test)]

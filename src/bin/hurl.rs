@@ -148,7 +148,7 @@ fn main() {
             .takes_value(true)
         )
         .arg(clap::Arg::with_name("har_report")
-            .long("har-report")
+            .long("report")
             .value_name("FILE")
             .help("Write output to har file")
             .takes_value(true)

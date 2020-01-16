@@ -1,6 +1,7 @@
 use cookie::Cookie as ExternalCookie;
 
 use super::core::*;
+use std::collections::HashMap;
 
 // cookies
 // keep cookies same name different domains
@@ -61,33 +62,54 @@ impl Cookie {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct CookieStore {
-    cookies: Vec<Cookie>
+    inner: HashMap<Domain, Vec<Cookie>>
 }
+
+
+
 
 impl CookieStore {
     fn init() -> CookieStore {
-        return CookieStore { cookies: vec![] };
+        return CookieStore { inner: HashMap::new() };
     }
-    fn add(&mut self, url: Url, cookie: Cookie) {
-        let domain = match cookie.domain {
-            None => url.host,
-            Some(v) => if is_sub_domain(url.host, v.clone()) {
-                v
-            } else {
-                return;
-            }
+
+    // TODO - add check
+    // TODO - add delete with Max-Age
+    fn update(&mut self, domain: Domain, cookie: Cookie) {
+//        let domain = match cookie.domain {
+//            None => url.host,
+//            Some(v) => if is_sub_domain(url.host, v.clone()) {
+//                v
+//            } else {
+//                return;
+//            }
+//        };
+//
+//        self.cookies.push(Cookie {
+//            name: cookie.name,
+//            value: cookie.value,
+//            max_age: cookie.max_age,
+//            domain: Some(domain),
+//        });
+        let mut domain_cookies = match self.inner.get(domain.as_str()) {
+             None => {
+                vec![]
+             }
+             Some(v) => {
+                v.clone()
+             }
+         };
+        domain_cookies.push(cookie);
+        self.inner.insert(domain, domain_cookies);
+
+    }
+
+    // TODO - add check
+    fn get_cookies(self, domain: Domain) -> Vec<Cookie> {
+        return match self.inner.get(domain.as_str()) {
+            None => vec![],
+            Some(v)=> v.clone()
         };
-
-        self.cookies.push(Cookie {
-            name: cookie.name,
-            value: cookie.value,
-            max_age: cookie.max_age,
-            domain: Some(domain),
-        });
-    }
-
-    fn get_cookies(self, url: Url) -> Vec<Cookie> {
-        return self.cookies;
     }
 }
 

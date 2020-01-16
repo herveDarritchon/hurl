@@ -9,39 +9,6 @@ use super::core::*;
 use super::core::Error;
 use super::text::*;
 
-//#[derive(Clone, Debug, PartialEq, Eq,Serialize, Deserialize)]
-//#[derive(Clone, Debug, PartialEq, Eq)]
-//pub struct EntryLog {
-//    pub request: http::Request,
-//    pub response: http::Response,
-//    pub captures: Vec<(String, Value)>,
-//    pub asserts: Vec<AssertResult>,
-//}
-
-
-//impl EntryLog {
-//    pub fn fail(self) -> bool {
-//       !self.errors().is_empty()
-//    }
-//    pub fn success(self) -> bool {
-//        self.errors().is_empty()
-//    }
-//
-//
-//    pub fn errors(self) -> Vec<Error> {
-//        return self.asserts.iter().filter_map(|e| e.clone().error()).collect();
-//    }
-//}
-
-//impl EntryResult {
-//
-//    pub fn errors(self) -> Vec<Error> {
-//        return match self {
-//            Ok(entry_log) => entry_log.errors(),
-//            Err(e) => vec![e],
-//        };
-//    }
-//}
 
 // cookies
 // for all domains
@@ -59,7 +26,7 @@ impl Entry {
 
         //let mut entry_log_builder = EntryLogBuilder::init();
 
-        let http_request = match self.clone().request.eval(variables, all_cookies, context_dir) {
+        let mut http_request = match self.clone().request.eval(variables, all_cookies, context_dir) {
             Ok(r) => r,
             Err(error) => {
                 return EntryResult {
@@ -71,6 +38,8 @@ impl Entry {
                 };
             }
         };
+        http_request.add_session_cookies(vec![]);
+
         if verbose {
             eprintln!("---------------------------------------------------------------------------------------------------");
             eprintln!("{}", http_request.to_text())
@@ -135,11 +104,7 @@ impl Entry {
             .filter_map(|assert| assert.clone().error())
             .map(|Error { source_info, inner, .. }| Error { source_info, inner, assert: true })
             .collect();
-//        if verbose {
-//            for assert_result in asserts.clone() {
-//                eprintln!("{:?} {}", assert_result.clone(), if assert_result.fail() { "Failure"} else { "Success"});
-//            }
-//        }
+
 
         // update cookies
         // for the domain
