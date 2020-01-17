@@ -119,8 +119,8 @@ fn test_predicate() {
 
 impl PredicateFunc {
     pub fn eval(self, variables: &HashMap<String, String>, value: Value) -> Result<(), Error> {
-//        eprintln!(">>> actual={:?}", value);
-//        eprintln!(">>> predicate={:#?}", self.clone());
+        //eprintln!(">>> actual={:?}", value);
+        //eprintln!(">>> predicate func={:#?}", self.clone());
         let source_info = self.source_info;
         return match (self.value, value.clone()) {
 
@@ -194,6 +194,16 @@ impl PredicateFunc {
                 }
             }
 
+            // match on bytes => assume that it's utf8 encoded
+            (PredicateFuncValue::Match { value, .. }, Value::Bytes(actual)) => {
+                let value = match String::from_utf8(actual) {
+                    Err(_) => return Err(Error { source_info, inner: RunnerError::InvalidUtf8, assert: false }),
+                    Ok(v) => v
+                };
+
+                Ok(())
+
+            }
 
             // countEquals integer
             (PredicateFuncValue::CountEqual {
@@ -207,6 +217,12 @@ impl PredicateFunc {
                 } else {
                     Err(Error { source_info, inner: RunnerError::PredicateValue(value), assert: false })
                 },
+            (PredicateFuncValue::CountEqual { value: expected, ..}, Value::Bytes(actual)) =>
+                if actual.len() as u64 == expected {
+                    Ok(())
+                } else {
+                    Err(Error { source_info, inner: RunnerError::PredicateValue(value), assert: false })
+                }
 
 
             // firstEquals bool

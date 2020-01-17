@@ -198,5 +198,21 @@ pub fn json_http_response() -> Response {
 "#.to_string()),
     };
 }
+
+
+#[cfg(test)]
+pub fn bytes_http_response() -> Response {
+    return Response {
+        version: Version::Http10,
+        status: 200,
+        headers: vec![
+            Header { name: String::from("Content-Type"), value: String::from("application/octet-stream") },
+            Header { name: String::from("Content-Length"), value: String::from("1") },
+        ],
+        body: vec![255],
+    };
+}
+
+
 // endregion
 

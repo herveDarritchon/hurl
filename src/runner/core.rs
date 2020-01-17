@@ -59,6 +59,7 @@ pub enum RunnerError {
     // Capture
     //CaptureNonScalarUnsupported,
     //??CaptureError {},
+    InvalidUtf8,
 
     // Query
     QueryHeaderNotFound,
@@ -67,7 +68,7 @@ pub enum RunnerError {
     QueryInvalidXpathEval,
     QueryInvalidXml,
     QueryInvalidJson,
-    QueryInvalidUtf8,
+
 
     // Predicate
     PredicateType,
@@ -102,7 +103,7 @@ impl FormatError for Error {
             RunnerError::AssertVersion { .. } => format!("Assert Http Version"),
             RunnerError::AssertStatus { .. } => format!("Assert Status"),
             RunnerError::QueryInvalidJson { .. } => format!("Invalid Json"),
-            RunnerError::QueryInvalidUtf8 { .. } => format!("Invalid Utf8"),
+            RunnerError::InvalidUtf8 { .. } => format!("Invalid Utf8"),
             RunnerError::QueryInvalidJsonpathExpression { .. } => format!("Invalid jsonpath"),
             RunnerError::PredicateType { .. } => format!("Assert - Inconsistent predicate type"),
         };
@@ -124,7 +125,7 @@ impl FormatError for Error {
             RunnerError::QueryInvalidXpathEval {} => format!("The xpath expression is not valid"),
             RunnerError::AssertHeaderValueError { actual } => format!("actual value is {}", actual),
             RunnerError::QueryInvalidJson { .. } => format!("The http response is not a valid json"),
-            RunnerError::QueryInvalidUtf8 { .. } => format!("The http response is not a valid utf8 string"),
+            RunnerError::InvalidUtf8 { .. } => format!("The http response is not a valid utf8 string"),
             RunnerError::QueryInvalidJsonpathExpression { .. } => format!("the jsonpath expression is not valid"),
             RunnerError::PredicateType { .. } => format!("predicate type inconsistent with value return by query"),
         };

@@ -80,7 +80,10 @@ fn body_text(bytes: Vec<u8>, content_type: Option<String>) -> String {
     return match content_type {
         Some(content_type) =>
             if is_text(content_type.as_str()) {
-                String::from_utf8(bytes).unwrap()
+                match String::from_utf8(bytes.clone()) {
+                    Ok(v) =>  format!("{}", v),
+                    Err(_) => format!("{:?}", bytes.clone())
+                }
             } else {
                 format!("{:?}", bytes)
             }

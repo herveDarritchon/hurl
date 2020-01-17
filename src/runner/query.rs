@@ -88,9 +88,9 @@ impl Query {
             QueryValue::Body {} => {
                 // can return a string if encoding is known and utf8
                 if http_response.has_utf8_body() {
-                    match String::from_utf8(http_response.body) {
+                    match String::from_utf8(http_response.body.clone()) {
                         Ok(s) => Ok(Value::String(s)),
-                        Err(_) => Err(Error { source_info: self.source_info, inner: RunnerError::QueryInvalidUtf8, assert: false }),
+                        Err(_) => Ok(Value::Bytes(http_response.body)),
                     }
                 } else {
                     Ok(Value::Bytes(http_response.body))
@@ -98,7 +98,7 @@ impl Query {
             }
             QueryValue::Xpath { expr: HurlString { value, source_info, .. }, .. } => {
                 match String::from_utf8(http_response.clone().body) {
-                    Err(_) => Err(Error { source_info: self.source_info.clone(), inner: RunnerError::QueryInvalidUtf8, assert: false }),
+                    Err(_) => Err(Error { source_info: self.source_info.clone(), inner: RunnerError::InvalidUtf8, assert: false }),
                     Ok(xml) => {
                         let result = if http_response.clone().is_html() {
                             xpath::eval_html(xml, value.clone())
@@ -138,7 +138,7 @@ impl Query {
                     Some(expr) => expr
                 };
                 let json = match String::from_utf8(http_response.body) {
-                    Err(_) => return Err(Error { source_info: self.source_info, inner: RunnerError::QueryInvalidUtf8, assert: false }),
+                    Err(_) => return Err(Error { source_info: self.source_info, inner: RunnerError::InvalidUtf8, assert: false }),
                     Ok(v) => v
                 };
                 let value = match expr.eval(json.as_str()) {
@@ -283,6 +283,14 @@ fn test_body() {
         }.eval(http::response::hello_http_response()).unwrap(),
         Value::String(String::from("Hello World!"))
     );
+    assert_eq!(
+        Query {
+            source_info: SourceInfo::init(0, 0, 0, 0),
+            value: QueryValue::Body {},
+        }.eval(http::response::bytes_http_response()).unwrap(),
+        Value::Bytes(vec![255])
+    );
+
 }
 
 // endregion
@@ -300,7 +308,7 @@ fn test_query_invalid_utf8() {
     };
     let error = xpath_users().eval(http_response).err().unwrap();
     assert_eq!(error.source_info.start, Pos { line: 1, column: 1 });
-    assert_eq!(error.inner, RunnerError::QueryInvalidUtf8);
+    assert_eq!(error.inner, RunnerError::InvalidUtf8);
 }
 
 #[test]

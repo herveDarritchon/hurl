@@ -13,7 +13,9 @@ use hurl::core::ast::HurlString;
 #[test]
 fn test_hurl_file() {
     let mut cookie_store = http::cookie::CookieStore::init();
-    let filename = "integration/tests/cookies.hurl";
+    let filename = "integration/tests/assert_match.hurl";
+    //let filename = "integration/tests/error_assert_match_utf8.hurl";
+    //let filename = "integration/tests/bytes.hurl";
     //let filename = "/mnt/secure/repos/work/myshop/integration/src/main/hurl-generated/pcm/pcm-jdd-open-up-150go.hurl";
     let content = std::fs::read_to_string(filename).expect("Something went wrong reading the file");
     let mut parser = hurl::parser::core::Parser::init(content.as_str());
@@ -43,7 +45,7 @@ fn test_hurl_file() {
         lines,
         &mut cookie_store
     );
-    //assert_eq!(1,2)
+    assert_eq!(1,2)
 
 }
 
