@@ -129,6 +129,7 @@ fn test_send_cookie() {
         value: "valueA;".to_string(),
         max_age: None,
         domain: None,
+        path: None,
     }.to_header();
     /*
     let request = Request {

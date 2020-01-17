@@ -61,7 +61,11 @@ impl Response {
                     None => None,
                     Some(v) => Some(v.to_string())
                 };
-                cookies.push(Cookie { name, value, max_age, domain });
+                let path = match c.path() {
+                    None => None,
+                    Some(v) => Some(v.to_string())
+                };
+                cookies.push(Cookie { name, value, max_age, domain, path });
             }
         }
         return cookies;

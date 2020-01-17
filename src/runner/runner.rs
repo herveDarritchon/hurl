@@ -18,7 +18,7 @@ pub fn run(
     filename: String,
     output_color: bool,
     lines: Vec<String>,
-    cookie_store: &mut http::cookie::CookieStore
+    cookiejar: &mut http::cookie::CookieJar
 ) -> HurlResult {
     let mut entries = vec![];
     let mut variables = HashMap::new();
@@ -30,7 +30,7 @@ pub fn run(
     //let mut variables = variables;
     for entry in hurl_file.entries {
         // eprintln!(">> entry");
-        let entry_result = entry.eval(&http_client, &mut variables, cookie_store, verbose, context_dir);
+        let entry_result = entry.eval(&http_client, &mut variables, cookiejar, verbose, context_dir);
         entries.push(entry_result.clone());
         for e in entry_result.errors.clone() {
             let error = format::error::Error {

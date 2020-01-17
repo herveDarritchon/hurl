@@ -196,12 +196,19 @@ impl PredicateFunc {
 
             // match on bytes => assume that it's utf8 encoded
             (PredicateFuncValue::Match { value, .. }, Value::Bytes(actual)) => {
-                let value = match String::from_utf8(actual) {
+                let actual_string = match String::from_utf8(actual.clone()) {
                     Err(_) => return Err(Error { source_info, inner: RunnerError::InvalidUtf8, assert: false }),
                     Ok(v) => v
                 };
 
-                Ok(())
+                match Regex::new(value.value.as_str()) {
+                    Ok(re) => if re.is_match(actual_string.as_str()) {
+                        Ok(())
+                    } else {
+                        return Err(Error { source_info, inner: RunnerError::PredicateValue(Value::Bytes(actual)), assert: false });
+                    }
+                    _ => Err(Error { source_info, inner: RunnerError::InvalidRegex(), assert: false })
+                }
 
             }
 

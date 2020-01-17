@@ -109,7 +109,8 @@ impl Request {
                 name: cookie.clone().name.value,
                 value: cookie.clone().value.value,
                 max_age: None,
-                domain: None,
+                domain: Some(url.clone().host),
+                path: None,
             };
             //headers.push(cookie.to_header());
             cookies.push(cookie);
@@ -337,7 +338,7 @@ pub fn test_hello_request() {
     let mut variables = HashMap::new();
    // let cookies = HashMap::new();
     variables.insert(String::from("base_url"), String::from("http://localhost:8000"));
-    let mut http_request = hello_request().eval(&variables, "current_dir").unwrap();
+    let http_request = hello_request().eval(&variables, "current_dir").unwrap();
     assert_eq!(http_request, http::request::hello_http_request());
 }
 
@@ -346,7 +347,7 @@ pub fn test_query_request() {
     let mut variables = HashMap::new();
     //let cookies = HashMap::new();
     variables.insert(String::from("param1"), String::from("value1"));
-    let mut http_request = query_request().eval(&variables, "current_dir").unwrap();
+    let http_request = query_request().eval(&variables, "current_dir").unwrap();
     assert_eq!(http_request, http::request::query_http_request());
 }
 

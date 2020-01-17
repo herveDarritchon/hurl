@@ -8,7 +8,7 @@ use crate::http;
 use super::core::*;
 use super::core::{Error, RunnerError};
 use super::text::*;
-use crate::http::cookie::CookieStore;
+use crate::http::cookie::CookieJar;
 
 
 // cookies
@@ -20,7 +20,7 @@ use crate::http::cookie::CookieStore;
 impl Entry {
     pub fn eval(self, http_client: &http::client::Client,
                 variables: &mut HashMap<String, String>,
-                cookie_store: &mut CookieStore,
+                cookiejar: &mut CookieJar,
                 verbose: bool,
                 context_dir: &str,
     ) -> EntryResult {
@@ -39,7 +39,9 @@ impl Entry {
                 };
             }
         };
-        http_request.add_session_cookies(cookie_store.clone().get_cookies(http_request.clone().host()));
+        let cookies = cookiejar.clone().get_cookies(http_request.clone().host(), String::from("/"));
+        //eprintln!(">>cookies={:?}", cookies);
+        http_request.add_session_cookies(cookies);
 
         if verbose {
             eprintln!("---------------------------------------------------------------------------------------------------");
@@ -125,7 +127,11 @@ impl Entry {
 //                };
 //                //eprintln!("[DEBUG] cookie {}={}{}", cookie.name, cookie.value, max_age);
 //            }
-            cookie_store.update(domain.clone(), cookie);
+            cookiejar.update_cookies(
+                domain.clone(),
+                http_request.clone().url.path,
+                cookie
+            );
 //            match cookie.max_age {
 //                Some(0) => {
 //
@@ -139,7 +145,7 @@ impl Entry {
         }
         if verbose {
             eprintln!("[DEBUG] Cookies for {}", domain);
-            for cookie in cookie_store.clone().get_cookies(domain) {
+            for cookie in cookiejar.clone().get_cookies(domain, String::from("/")) {
                 eprintln!("[DEBUG] {}", cookie.to_string());
             }
         }

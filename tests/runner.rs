@@ -12,8 +12,8 @@ use hurl::core::ast::HurlString;
 // can be used for debugging
 #[test]
 fn test_hurl_file() {
-    let mut cookie_store = http::cookie::CookieStore::init();
-    let filename = "integration/tests/assert_match.hurl";
+    let mut cookie_store = http::cookie::CookieJar::init();
+    let filename = "integration/tests/cookies.hurl";
     //let filename = "integration/tests/error_assert_match_utf8.hurl";
     //let filename = "integration/tests/bytes.hurl";
     //let filename = "/mnt/secure/repos/work/myshop/integration/src/main/hurl-generated/pcm/pcm-jdd-open-up-150go.hurl";
@@ -45,7 +45,7 @@ fn test_hurl_file() {
         lines,
         &mut cookie_store
     );
-    assert_eq!(1,2)
+//    assert_eq!(1,2)
 
 }
 
@@ -117,7 +117,7 @@ fn hello_request() -> ast::Request {
 
 #[test]
 fn test_hello() {
-    let mut cookie_store = http::cookie::CookieStore::init();
+    let mut cookie_store = http::cookie::CookieJar::init();
     let client = http::client::Client::init(http::client::ClientOptions {
         noproxy_hosts: vec![],
         insecure: false,

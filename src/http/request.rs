@@ -82,24 +82,27 @@ impl Request {
         }
 
         for cookie in self.cookies {
-            headers.push(Header {
-                name: String::from("Cookie"),
-                value: cookie.to_string(),
-            });
+            headers.push(cookie.to_header());
         }
         return headers;
     }
 
     pub fn add_session_cookies(&mut self, cookies: Vec<Cookie>) {
         //eprintln!("add session cookies {:?}", cookies);
+
         for cookie in cookies {
+
+            // TBC: both request and session cookies should have a domain => should not be an Option
+            let session_domain = cookie.clone().domain.unwrap();
             match self.clone().get_cookie(cookie.clone().name) {
-                Some(Cookie { domain,.. }) => {
-                    if domain != cookie.domain {
+                Some(Cookie { domain: Some(domain),.. }) => {
+                    if session_domain != domain {
                         self.cookies.push(cookie.clone());
                     }
                 },
-                _ => {self.cookies.push(cookie.clone());}
+                _ => {
+                    self.cookies.push(cookie.clone());
+                }
             }
         }
     }
@@ -184,12 +187,14 @@ pub fn custom_http_request() -> Request {
                 value: String::from("light"),
                 max_age: None,
                 domain: None,
+                path: None,
             },
             Cookie {
                 name: String::from("sessionToken"),
                 value: String::from("abc123"),
                 max_age: None,
                 domain: None,
+                path: None,
             }
         ],
         body: vec![],
