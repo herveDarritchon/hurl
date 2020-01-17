@@ -81,8 +81,15 @@ impl Request {
             }
         }
 
-        for cookie in self.cookies {
-            headers.push(cookie.to_header());
+        if !self.cookies.is_empty() {
+            headers.push(Header {
+                name: String::from("Cookie"),
+                value: self.cookies
+                    .iter()
+                    .map(|c| format!("{}={}",c.name, c.value))
+                    .collect::<Vec<String>>()
+                    .join("; "),
+            });
         }
         return headers;
     }
@@ -241,12 +248,18 @@ pub fn test_headers() {
         Header { name: String::from("Host"), value: String::from("localhost") }
     ]);
 
+//    assert_eq!(custom_http_request().headers(), vec![
+//        Header { name: String::from("User-Agent"), value: String::from("iPhone") },
+//        Header { name: String::from("Foo"), value: String::from("Bar") },
+//        Header { name: String::from("Host"), value: String::from("localhost") },
+//        Header { name: String::from("Cookie"), value: String::from("theme=light") },
+//        Header { name: String::from("Cookie"), value: String::from("sessionToken=abc123") },
+//    ]);
     assert_eq!(custom_http_request().headers(), vec![
         Header { name: String::from("User-Agent"), value: String::from("iPhone") },
         Header { name: String::from("Foo"), value: String::from("Bar") },
         Header { name: String::from("Host"), value: String::from("localhost") },
-        Header { name: String::from("Cookie"), value: String::from("theme=light") },
-        Header { name: String::from("Cookie"), value: String::from("sessionToken=abc123") },
+        Header { name: String::from("Cookie"), value: String::from("theme=light; sessionToken=abc123") },
     ]);
 }
 

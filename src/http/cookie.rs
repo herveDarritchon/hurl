@@ -63,13 +63,13 @@ impl Cookie {
         );
     }
 
-    pub fn to_header(&self) -> Header {
-        return Header {
-            name: String::from("Cookie"),
-            value: format!("{}={}", self.name, self.value),
-        };
-        //format!("Cookie: {}", self.to_string());
-    }
+//    pub fn to_header(&self) -> Header {
+//        return Header {
+//            name: String::from("Cookie"),
+//            value: format!("{}={}", self.name, self.value),
+//        };
+//        //format!("Cookie: {}", self.to_string());
+//    }
 
 
     pub fn encode_cookie(header_name: String, header_value: String) -> Header {
@@ -95,6 +95,21 @@ impl CookieJar {
     pub fn init() -> CookieJar {
         return CookieJar { inner: vec![]};
     }
+
+    pub fn cookies(self) -> Vec<Cookie> {
+        return self.inner
+            .iter()
+            .map(|c| Cookie {
+                name: c.clone().name,
+                value: c.clone().value,
+                max_age: None,
+                domain: Some(c.domain.clone()),
+                path: Some(c.path.clone())
+            })
+            .collect();
+    }
+
+
     pub fn get_cookies(self, domain: String, path:String) -> Vec<Cookie> {
         return self.inner
             .iter()
@@ -149,7 +164,7 @@ impl InternalCookie {
     fn is_usable(&self, domain: String, path: String) -> bool {
 
         // domain
-        if !is_subdomain(domain.clone(), self.clone().domain) {
+        if !is_subdomain(self.clone().domain, domain.clone(), ) {
             return false;
         }
         if !self.subdomains && domain != self.clone().domain {
@@ -157,7 +172,7 @@ impl InternalCookie {
         }
 
         // path
-        if !is_subpath(path, self.clone().path) {
+        if !is_subpath(self.clone().path, path, ) {
             return false;
         }
         return true;
@@ -200,16 +215,16 @@ fn cookie_ssid() -> InternalCookie {
     };
 }
 
-//#[cfg(test)]
-//fn sample_cookiejar() -> CookieJar {
-//    return CookieJar {
-//        inner: vec![
-//            cookie_lsid(),
-//            cookie_hsid(),
-//            cookie_ssid(),
-//        ]
-//    };
-//}
+#[cfg(test)]
+fn sample_cookiejar() -> CookieJar {
+    return CookieJar {
+        inner: vec![
+            cookie_lsid(),
+            cookie_hsid(),
+            cookie_ssid(),
+        ]
+    };
+}
 
 
 // question
@@ -235,16 +250,32 @@ fn test_is_usable() {
     let domain = String::from("foo.com");
     let path = String::from("/accounts");
     assert_eq!(cookie_lsid().is_usable(domain.clone(), path.clone()), false);
-    assert_eq!(cookie_hsid().is_usable(domain.clone(), path.clone()), false);
-    assert_eq!(cookie_ssid().is_usable(domain.clone(), path.clone()), false);
+    assert_eq!(cookie_hsid().is_usable(domain.clone(), path.clone()), true);
+    assert_eq!(cookie_ssid().is_usable(domain.clone(), path.clone()), true);
 
     let domain = String::from("docs.foo.com");
     let path = String::from("/accounts");
     assert_eq!(cookie_lsid().is_usable(domain.clone(), path.clone()), true);
-    assert_eq!(cookie_hsid().is_usable(domain.clone(), path.clone()), false);
-    assert_eq!(cookie_ssid().is_usable(domain.clone(), path.clone()), false);
+    assert_eq!(cookie_hsid().is_usable(domain.clone(), path.clone()), true);
+    assert_eq!(cookie_ssid().is_usable(domain.clone(), path.clone()), true);
 
 }
+
+
+#[test]
+fn test_get_cookies() {
+
+    let domain = String::from("docs.foo.com");
+    let path = String::from("/accounts");
+    assert_eq!(sample_cookiejar().get_cookies(domain, path).len(), 3);
+
+    let domain = String::from("toto.docs.foo.com");
+    let path = String::from("/accounts");
+    assert_eq!(sample_cookiejar().get_cookies(domain, path).len(), 2);
+
+
+}
+
 
 // region domain
 

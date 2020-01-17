@@ -42,7 +42,6 @@ impl Entry {
         let cookies = cookiejar.clone().get_cookies(http_request.clone().host(), String::from("/"));
         //eprintln!(">>cookies={:?}", cookies);
         http_request.add_session_cookies(cookies);
-
         if verbose {
             eprintln!("---------------------------------------------------------------------------------------------------");
             eprintln!("{}", http_request.to_text())
@@ -144,8 +143,8 @@ impl Entry {
 //            }
         }
         if verbose {
-            eprintln!("[DEBUG] Cookies for {}", domain);
-            for cookie in cookiejar.clone().get_cookies(domain, String::from("/")) {
+            eprintln!("[DEBUG] CookieJar");
+            for cookie in cookiejar.clone().cookies() {
                 eprintln!("[DEBUG] {}", cookie.to_string());
             }
         }

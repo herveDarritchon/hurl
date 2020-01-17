@@ -124,13 +124,13 @@ fn test_send_cookie() {
     assert_eq!(response.status, 200);
 
     let _client = http::client::Client::init(default_client_options());
-    let _cookie_header = http::cookie::Cookie {
-        name: "Cookie1".to_string(),
-        value: "valueA;".to_string(),
-        max_age: None,
-        domain: None,
-        path: None,
-    }.to_header();
+//    let _cookie_header = http::cookie::Cookie {
+//        name: "Cookie1".to_string(),
+//        value: "valueA;".to_string(),
+//        max_age: None,
+//        domain: None,
+//        path: None,
+//    }.to_header();
     /*
     let request = Request {
         method: Method::Get,
