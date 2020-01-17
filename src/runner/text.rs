@@ -17,7 +17,11 @@ impl Textable for Request {
             s.push_str(header.to_text().as_str());
         }
         s.push_str("\n");
-        s.push_str(body_text(self.clone().body, get_header_value(self.clone().headers, "content-type")).as_str());
+
+
+        let content_type = get_header_value(self.clone().headers(), "content-type");
+        s.push_str(body_text(self.clone().body, content_type).as_str());
+        s.push_str("\n");
         return s;
     }
 }
@@ -77,6 +81,7 @@ impl Textable for Header {
 
 
 fn body_text(bytes: Vec<u8>, content_type: Option<String>) -> String {
+    // eprintln!(">>> body_text {:?}", content_type);
     return match content_type {
         Some(content_type) =>
             if is_text(content_type.as_str()) {
