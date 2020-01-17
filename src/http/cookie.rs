@@ -124,24 +124,38 @@ impl CookieJar {
             .collect();
     }
 
-    pub fn update_cookies(&mut self, default_domain: String, default_path:String, cookie: Cookie) {
+    pub fn update_cookies(&mut self, default_domain: String, _default_path:String, cookie: Cookie) {
 
           match cookie.max_age {
               Some(0) => {
                   self.inner.retain(|c| c.name != cookie.name);
               },
               _ => {
+
+                  // replace value if same name+domain
+                  let domain = match cookie.clone().domain {
+                      None => default_domain,
+                      Some(d) => d,
+                  };
+                  let path = match cookie.clone().path {
+                      None => String::from("/"), // do not use default path for the time-beingdefault_path,
+                      Some(p) => p,
+                  };
+
+                  // find existing cookie
+                  for c in self.inner.iter_mut() {
+                      if c.name == cookie.name && c.domain == domain {
+                          c.value = cookie.value;
+                          return;
+                      }
+                  }
+
+                  // push new cookie
                   self.inner.push(InternalCookie {
                       name: cookie.clone().name,
                       value: cookie.clone().value,
-                      domain:  match cookie.clone().domain {
-                          None => default_domain,
-                          Some(d) => d,
-                      },
-                      path: match cookie.clone().path {
-                          None => default_path,
-                          Some(p) => p,
-                      },
+                      domain,
+                      path,
                       subdomains: !cookie.domain.is_none()
                   });
               }

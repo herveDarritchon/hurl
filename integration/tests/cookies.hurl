@@ -5,8 +5,10 @@ GET http://localhost:8000/cookies/set-request-cookie1-valueA
 cookie1: valueA
 HTTP/1.0 200
 
-GET http://localhost:8000/cookies/assert-that-cookie1-is-not-in-session
-HTTP/1.0 200
+# In the future we want a dedicated directive to set the session cookie on the client
+# but for the time-being, sending a request cookie will update the cookiejar
+#GET http://localhost:8000/cookies/assert-that-cookie1-is-not-in-session
+#HTTP/1.0 200
 
 
 
@@ -21,6 +23,7 @@ GET http://localhost:8000/cookies/assert-that-cookie2-is-valueA
 HTTP/1.0 200
 
 
+
 GET http://127.0.0.1:8000/cookies/assert-that-cookie2-is-not-in-session
 HTTP/1.0 200
 
@@ -30,7 +33,10 @@ GET http://localhost:8000/cookies/set-request-cookie2-valueB
 cookie2: valueB
 HTTP/1.0 200
 
-GET http://localhost:8000/cookies/assert-that-cookie2-is-valueA
+# In the future we want a dedicated directive to set the session cookie on the client
+# but for the time-being, sending a request cookie will update the cookiejar
+#GET http://localhost:8000/cookies/assert-that-cookie2-is-valueA
+GET http://localhost:8000/cookies/assert-that-cookie2-is-valueB
 HTTP/1.0 200
 
 GET http://localhost:8000/cookies/delete-cookie2
@@ -38,8 +44,8 @@ HTTP/1.0 200
 [Asserts]
 header Set-Cookie contains "Max-Age=0"   # TODO replace by cookie query
 
-GET http://localhost:8000/cookies/assert-that-cookie2-is-not-in-session
-HTTP/1.0 200
+#GET http://localhost:8000/cookies/assert-that-cookie2-is-not-in-session
+#HTTP/1.0 200
 
 
 
