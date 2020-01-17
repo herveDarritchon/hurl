@@ -116,6 +116,17 @@ impl Entry {
         let domain = http_request.clone().host();
         //let mut cookies = cookie_store.get_cookies(host);
 
+        // TEMPORARY also update store from request cookie
+        // TODO - DO BE REMOVED - add explicit directive in hurl file to interract with cookiejar
+        for cookie in http_request.clone().cookies {
+            //  eprintln!(">> Update cookidjar with cookie {:?}", cookie);
+            cookiejar.update_cookies(
+                domain.clone(),
+                http_request.clone().url.path,
+                cookie
+            );
+        }
+
 
         for cookie in http_response.cookies() {
 
@@ -146,16 +157,6 @@ impl Entry {
 //                }
 //            }
         }
-        // TEMPORARY also update store from request cookie
-        // TODO - DO BE REMOVED - add explicit directive in hurl file to interract with cookiejar
-        for cookie in http_request.clone().cookies {
-          //  eprintln!(">> Update cookidjar with cookie {:?}", cookie);
-           cookiejar.update_cookies(
-               domain.clone(),
-               http_request.clone().url.path,
-               cookie
-           );
-       }
 
         if verbose {
             eprintln!("[DEBUG] CookieJar");

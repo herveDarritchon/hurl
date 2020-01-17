@@ -128,6 +128,7 @@ impl CookieJar {
 
           match cookie.max_age {
               Some(0) => {
+                  //eprintln!("delete cookie {:?}", cookie);
                   self.inner.retain(|c| c.name != cookie.name);
               },
               _ => {
