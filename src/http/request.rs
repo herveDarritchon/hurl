@@ -13,6 +13,7 @@ const FRAGMENT: &AsciiSet = &CONTROLS
     .add(b'>')
     .add(b'+')
     .add(b'=')
+    .add(b'?')
     .add(b'`');
 
 // region request
