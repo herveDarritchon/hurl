@@ -214,7 +214,7 @@ fn test_form_param() {
             value: "application/x-www-form-urlencoded".to_string(),
         }],
         cookies: vec![],
-        body: "param1=value1&param2=".to_string().into_bytes(),
+        body: "param1=value1&param2=&param3=a%3db".to_string().into_bytes(),
     };
     let response = client.execute(&request).unwrap();
     assert_eq!(response.status, 200);
