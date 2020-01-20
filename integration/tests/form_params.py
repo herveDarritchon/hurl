@@ -5,6 +5,7 @@ from flask import request
 def form_params():
     assert request.form['param1'] == 'value1'
     assert request.form['param2'] == ''
+    assert request.form['param3'] == 'a=b'
     return ''
 
 

@@ -1,4 +1,4 @@
-use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
+use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode, percent_decode};
 use serde::{Deserialize, Serialize};
 
 use super::cookie::*;
@@ -87,12 +87,21 @@ impl Request {
                 name: String::from("Cookie"),
                 value: self.cookies
                     .iter()
-                    .map(|c| format!("{}={}",c.name, c.value))
+                    .map(|c| format!("{}={}", c.name, c.value))
                     .collect::<Vec<String>>()
                     .join("; "),
             });
         }
         return headers;
+    }
+
+    pub fn content_type(self) -> Option<String> {
+        for Header { name, value } in self.headers {
+            if name == String::from("Content-Type") {
+                return Some(value);
+            }
+        }
+        return None;
     }
 
     pub fn add_session_cookies(&mut self, cookies: Vec<Cookie>) {
@@ -103,11 +112,11 @@ impl Request {
             // TBC: both request and session cookies should have a domain => should not be an Option
             let session_domain = cookie.clone().domain.unwrap();
             match self.clone().get_cookie(cookie.clone().name) {
-                Some(Cookie { domain: Some(domain),.. }) => {
+                Some(Cookie { domain: Some(domain), .. }) => {
                     if session_domain != domain {
                         self.cookies.push(cookie.clone());
                     }
-                },
+                }
                 _ => {
                     self.cookies.push(cookie.clone());
                 }
@@ -123,6 +132,35 @@ impl Request {
             }
         }
         return None;
+    }
+
+
+    pub fn form_params(self) -> Option<Vec<Param>> {
+        if self.clone().content_type() != Some(String::from("application/x-www-form-urlencoded")) {
+            return None;
+        }
+        let decoded = percent_decode(&self.body);
+        let params = match decoded.decode_utf8() {
+            Ok(v) => {
+                let params: Vec<&str> = v.split("&").collect();
+                params.iter().map(|s| Param::parse(s)).collect()
+            }
+            _ => vec![]
+        };
+        return Some(params);
+    }
+}
+
+
+impl Param {
+    fn parse(s: &str) -> Param {
+        match s.find('=') {
+            None => Param { name: s.to_string(), value: String::from("") },
+            Some(i) => {
+                let (name, value) = s.split_at(i);
+                Param { name: name.to_string(), value: value[1..].to_string() }
+            }
+        }
     }
 }
 
@@ -155,7 +193,7 @@ pub fn query_http_request() -> Request {
             port: Some(8000),
             path: "/querystring-params".to_string(),
         },
-        //String::from("http://localhost:8000/querystring-params"),
+//String::from("http://localhost:8000/querystring-params"),
 //        querystring_params: vec![
 //            Param { name: String::from("param1"), value: String::from("value1") },
 //            Param { name: String::from("param2"), value: String::from("") }
@@ -206,6 +244,36 @@ pub fn custom_http_request() -> Request {
             }
         ],
         body: vec![],
+    };
+}
+
+
+#[cfg(test)]
+pub fn form_http_request() -> Request {
+    let params = vec![
+        Param { name: String::from("param1"), value: String::from("value1") },
+        Param { name: String::from("param2"), value: String::from("") },
+        Param { name: String::from("param3"), value: String::from("a=b") },
+    ];
+    let encoded_params = params
+        .iter()
+        .map(|param| format!("{}={}", param.name, utf8_percent_encode(&param.value, FRAGMENT).to_string()))
+        .collect::<Vec<String>>()
+        .join("&");
+    return Request {
+        method: Method::Post,
+        url: Url {
+            scheme: "http".to_string(),
+            host: "localhost".to_string(),
+            port: None,
+            path: "/form-params".to_string(),
+        },
+        querystring: vec![],
+        headers: vec![
+            Header { name: String::from("Content-Type"), value: String::from("application/x-www-form-urlencoded") },
+        ],
+        cookies: vec![],
+        body: encoded_params.into_bytes(),
     };
 }
 
@@ -275,5 +343,22 @@ pub fn test_url() {
     assert_eq!(query_http_request().url(), String::from("http://localhost:8000/querystring-params?param1=value1&param2=a%20b"));
 }
 
+
+// endregion
+
+
+// region form_headers
+
+// region headers
+
+#[test]
+pub fn test_form_params() {
+    assert_eq!(hello_http_request().form_params(), None);
+    assert_eq!(form_http_request().form_params().unwrap(), vec![
+        Param { name: String::from("param1"), value: String::from("value1") },
+        Param { name: String::from("param2"), value: String::from("") },
+        Param { name: String::from("param3"), value: String::from("a=b") },
+    ]);
+}
 
 // endregion

@@ -18,13 +18,23 @@ impl Textable for Request {
         }
         s.push_str("\n");
 
-
-        let content_type = get_header_value(self.clone().headers(), "content-type");
-        s.push_str(body_text(self.clone().body, content_type).as_str());
+        let body = match self.clone().form_params() {
+            None => body_text(self.clone().body, self.clone().content_type()),
+            Some(params) => {
+                let mut buf = String::from("[Form Params]");
+                for param in params {
+                    buf.push_str(format!("\n{}={}", param.name, param.value).as_str())
+                }
+                buf
+            }
+        };
+        s.push_str(body.as_str());
         s.push_str("\n");
         return s;
     }
 }
+
+
 
 
 impl Textable for Response {
@@ -84,7 +94,10 @@ fn body_text(bytes: Vec<u8>, content_type: Option<String>) -> String {
     // eprintln!(">>> body_text {:?}", content_type);
     return match content_type {
         Some(content_type) =>
-            if is_text(content_type.as_str()) {
+           if content_type == String::from("application/x-www-form-urlencoded") {
+               format!("xx")
+
+           } else if is_text(content_type.as_str()) {
                 match String::from_utf8(bytes.clone()) {
                     Ok(v) =>  format!("{}", v),
                     Err(_) => format!("{:?}", bytes.clone())

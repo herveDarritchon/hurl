@@ -4,6 +4,7 @@ use serde::Serialize;
 use crate::http;
 
 use super::core::*;
+use base64;
 
 impl Serialize for HurlResult {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -63,6 +64,15 @@ impl Serialize for http::request::Request {
         state.serialize_field("queryString", &self.clone().querystring)?;
         state.serialize_field("headers", &self.clone().headers())?;
         state.serialize_field("cookies", &self.clone().cookies)?;
+
+        match self.clone().form_params() {
+            Some(params) => {
+                state.serialize_field("format_params", &params)?;
+            },
+            _ => {}
+        }
+        state.serialize_field("body", &base64::encode(&self.body))?;
+
         state.end()
     }
 }

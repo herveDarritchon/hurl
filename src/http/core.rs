@@ -163,12 +163,13 @@ fn test_add_query_param() {
 
 // endregion
 
+
 // region add_form_param
 #[allow(dead_code)]
 pub fn encode_form_params(params: Vec<Param>) -> Vec<u8> {
     return params
         .iter()
-        .map(|p| format!("{}={}", p.name, p.value))
+        .map(|p| format!("{}={}", p.name, utf8_percent_encode(p.value.as_str(), FRAGMENT)))
         .collect::<Vec<_>>()
         .join("&")
         .into_bytes();
