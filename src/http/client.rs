@@ -138,6 +138,7 @@ impl Client {
                 });
             }
             Err(e) => {
+                //eprintln!(">>{:?}", e.source());
                 return Err(HttpError {
                     message: format!("{:?}", e.to_string()),
                     url: request.clone().url(),
