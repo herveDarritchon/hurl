@@ -17,9 +17,11 @@ before_script:
 
 script:
     - cargo build --release --verbose
+    - strip $PWD/target/release/hurl
     - cargo test --verbose
     - export PATH="$PWD/target/release:$PATH"
     - integration/integration.sh
+    - strip $PWD/target/release/hurl
 
 
 deploy:
