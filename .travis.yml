@@ -20,6 +20,8 @@ script:
     - cargo test --verbose
     - export PATH="$PWD/target/release:$PATH"
     - integration/integration.sh
+    - strip $PWD/target/release/hurl
+    - strip $PWD/target/release/hurlfmt
 
 
 deploy:
