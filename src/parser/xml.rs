@@ -91,4 +91,8 @@ fn test_parsing_xml_brute_force() {
     assert_eq!(parser.state.cursor, 23);
     assert_eq!(parser.remaining(), String::from("xx"));
 
+    let mut parser = Parser::init("<?xml version=\"1.0\"?><users/>xxx");
+    assert_eq!(parse(&mut parser).unwrap(), String::from("<?xml version=\"1.0\"?><users/>"));
+    assert_eq!(parser.state.cursor, 29);
+
 }

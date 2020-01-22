@@ -9,3 +9,9 @@ def post_xml():
 <drink>caf\u00e9</drink>'''
     return ''
 
+@app.route('/post-xml-no-prolog', methods=['POST'])
+def post_xml_no_prolog():
+    s = request.data.decode("utf-8")
+    assert s == '''<drink>caf\u00e9</drink>'''
+    return ''
+
