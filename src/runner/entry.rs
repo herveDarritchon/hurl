@@ -22,7 +22,7 @@ impl Entry {
                 variables: &mut HashMap<String, String>,
                 cookiejar: &mut CookieJar,
                 verbose: bool,
-                context_dir: &str,
+                context_dir: String,
     ) -> EntryResult {
 
         //let mut entry_log_builder = EntryLogBuilder::init();

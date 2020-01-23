@@ -13,13 +13,13 @@ use super::core::{Error, RunnerError};
 use super::super::core::ast::*;
 
 impl Body {
-    pub fn eval(self, context_dir: &str) -> Result<Vec<u8>, Error> {
+    pub fn eval(self, context_dir: String) -> Result<Vec<u8>, Error> {
         return self.value.eval(context_dir);
     }
 }
 
 impl Bytes {
-    pub fn eval(self, context_dir: &str) -> Result<Vec<u8>, Error> {
+    pub fn eval(self, context_dir: String) -> Result<Vec<u8>, Error> {
         return match self {
             Bytes::MultilineString { value, .. } => Ok(value.into_bytes()),
             Bytes::Base64 { value, .. } => Ok(value),
@@ -30,7 +30,7 @@ impl Bytes {
                 let absolute_filename = if path.is_absolute() {
                     filename.clone().value
                 } else {
-                    Path::new(context_dir).join(filename.value).to_str().unwrap().to_string()
+                    Path::new(context_dir.as_str()).join(filename.value).to_str().unwrap().to_string()
                 };
                 match File::open(absolute_filename.clone()) {
                     Ok(f) => {
@@ -85,7 +85,7 @@ pub fn test_body_file() {
         space1: whitespace.clone(),
     };
 
-    assert_eq!(bytes.eval("current_dir").unwrap(), "Hello World!".as_bytes());
+    assert_eq!(bytes.eval("current_dir".to_string()).unwrap(), "Hello World!".as_bytes());
 }
 
 #[test]
@@ -103,7 +103,7 @@ pub fn test_body_file_error() {
     };
 
 
-    let error = bytes.eval("current_dir").err().unwrap();
+    let error = bytes.eval("current_dir".to_string()).err().unwrap();
     assert_eq!(error.inner, RunnerError::FileReadAccess { value: String::from("current_dir/data.bin") });
     assert_eq!(error.source_info, SourceInfo::init(1, 7, 1, 15));
 }

@@ -27,7 +27,7 @@ use super::super::core::ast::*;
 impl Request {
     pub fn eval(self,
                 variables: &HashMap<String, String>,
-                context_dir: &str,
+                context_dir: String,
     )
                 -> Result<http::request::Request, Error> {
 
@@ -328,7 +328,7 @@ pub fn query_request() -> Request {
 #[test]
 pub fn test_error_variable() {
     let variables = HashMap::new();
-    let error = hello_request().eval(&variables, "current_dir").err().unwrap();
+    let error = hello_request().eval(&variables, "current_dir".to_string()).err().unwrap();
     assert_eq!(error.source_info, SourceInfo::init(1, 7, 1, 15));
     assert_eq!(error.inner, RunnerError::TemplateVariableNotDefined { name: String::from("base_url") });
 }
@@ -338,7 +338,7 @@ pub fn test_hello_request() {
     let mut variables = HashMap::new();
    // let cookies = HashMap::new();
     variables.insert(String::from("base_url"), String::from("http://localhost:8000"));
-    let http_request = hello_request().eval(&variables, "current_dir").unwrap();
+    let http_request = hello_request().eval(&variables, "current_dir".to_string()).unwrap();
     assert_eq!(http_request, http::request::hello_http_request());
 }
 
@@ -347,7 +347,7 @@ pub fn test_query_request() {
     let mut variables = HashMap::new();
     //let cookies = HashMap::new();
     variables.insert(String::from("param1"), String::from("value1"));
-    let http_request = query_request().eval(&variables, "current_dir").unwrap();
+    let http_request = query_request().eval(&variables, "current_dir".to_string()).unwrap();
     assert_eq!(http_request, http::request::query_http_request());
 }
 

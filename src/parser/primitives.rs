@@ -944,6 +944,10 @@ fn test_hurl_value_text_with_variable() {
 
 // region filename
 
+// this is an absolure file
+// that you have to write with a relative name
+// default root_dir is the hurl directory
+
 pub fn filename(p: &mut Parser) -> ParseResult<'static, Filename> {
     let start = p.state.clone();
     let s = p.next_chars_while(|c| c.is_alphanumeric() || *c == '.' || *c == '/' || *c == '_');
@@ -954,6 +958,14 @@ pub fn filename(p: &mut Parser) -> ParseResult<'static, Filename> {
             inner: ParseError::Filename {},
         });
     }
+    if s.starts_with("/") {
+        return Err(Error {
+            pos: start.pos,
+            recoverable: false,
+            inner: ParseError::Filename {},
+        });
+    }
+
     return Ok(Filename {
         value: s,
         source_info: SourceInfo {
@@ -965,19 +977,40 @@ pub fn filename(p: &mut Parser) -> ParseResult<'static, Filename> {
 
 #[test]
 fn test_filename() {
+    let mut parser = Parser::init("data/data.bin");
+    assert_eq!(filename(&mut parser).unwrap(),
+               Filename {
+                   value: String::from("data/data.bin"),
+                   source_info: SourceInfo::init(1, 1, 1, 14),
+               }
+    );
+    assert_eq!(parser.state.cursor, 13);
+
+    let mut parser = Parser::init("data.bin");
+    assert_eq!(filename(&mut parser).unwrap(),
+               Filename {
+                   value: String::from("data.bin"),
+                   source_info: SourceInfo::init(1, 1, 1, 9),
+               }
+    );
+    assert_eq!(parser.state.cursor, 8);
+
+}
+
+#[test]
+fn test_filename_error() {
     let mut parser = Parser::init("???");
     let error = filename(&mut parser).err().unwrap();
     assert_eq!(error.inner, ParseError::Filename {});
     assert_eq!(error.pos, Pos { line: 1, column: 1 });
 
+    // can not absolute
     let mut parser = Parser::init("/tmp/data.bin");
-    assert_eq!(filename(&mut parser).unwrap(),
-               Filename {
-                   value: String::from("/tmp/data.bin"),
-                   source_info: SourceInfo::init(1, 1, 1, 14),
-               }
-    );
+    let error = filename(&mut parser).err().unwrap();
+    assert_eq!(error.inner, ParseError::Filename {});
+    assert_eq!(error.pos, Pos { line: 1, column: 1 });
 }
+
 
 // endregion
 
@@ -1661,7 +1694,7 @@ fn test_file_bytes() {
         }
     );
 
-    let mut parser = Parser::init("file, /tmp/filename1;");
+    let mut parser = Parser::init("file, tmp/filename1;");
     assert_eq!(
         file_bytes(&mut parser).unwrap(),
         Bytes::File {
@@ -1670,12 +1703,12 @@ fn test_file_bytes() {
                 source_info: SourceInfo::init(1, 6, 1, 7),
             },
             filename: Filename {
-                value: String::from("/tmp/filename1"),
-                source_info: SourceInfo::init(1, 7, 1, 21),
+                value: String::from("tmp/filename1"),
+                source_info: SourceInfo::init(1, 7, 1, 20),
             },
             space1: Whitespace {
                 value: String::from(""),
-                source_info: SourceInfo::init(1, 21, 1, 21),
+                source_info: SourceInfo::init(1, 20, 1, 20),
             },
         }
     );

@@ -14,7 +14,7 @@ pub fn run(
     fail_fast: bool,
     init_variables: &HashMap<String, String>,
     verbose: bool,
-    context_dir: &str,
+    context_dir: String,
     filename: String,
     output_color: bool,
     lines: Vec<String>,
@@ -29,8 +29,8 @@ pub fn run(
 
     //let mut variables = variables;
     for entry in hurl_file.entries {
-        // eprintln!(">> entry");
-        let entry_result = entry.eval(&http_client, &mut variables, cookiejar, verbose, context_dir);
+        // eprintln!(">> entry ");
+        let entry_result = entry.eval(&http_client, &mut variables, cookiejar, verbose, context_dir.clone());
         entries.push(entry_result.clone());
         for e in entry_result.errors.clone() {
             let error = format::error::Error {

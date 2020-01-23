@@ -22,6 +22,7 @@ fn execute(filename: &str,
            noproxy_hosts: Vec<String>,
            variables: &HashMap<String, String>,
            current_dir: &Path,
+           file_root: Option<String>,
 ) -> HurlResult {
     let contents = if filename == "-" {
         let mut contents = String::new();
@@ -75,13 +76,28 @@ fn execute(filename: &str,
                 insecure,
             });
 
-            let context_dir = if filename == "-" {
-                current_dir.to_str().unwrap()
-            } else {
-                let path = Path::new(filename);
-                let parent = path.parent();
-                parent.unwrap().to_str().unwrap()
+            let context_dir = match file_root {
+                None => {
+                    if filename == "-" {
+                        current_dir.to_str().unwrap().to_string()
+                    } else {
+                        let path = Path::new(filename);
+                        let parent = path.parent();
+                        parent.unwrap().to_str().unwrap().to_string()
+                    }
+                },
+                Some(filename) => {
+                    filename
+                }
             };
+
+//            let context_dir = if filename == "-" {
+//                current_dir.to_str().unwrap()
+//            } else {
+//                let path = Path::new(filename);
+//                let parent = path.parent();
+//                parent.unwrap().to_str().unwrap()
+//            };
             let lines: Vec<String> = lines.iter().map(|s| s.to_string()).collect();
             let hurl_result = runner::runner::run(client,
                                                   hurl_file,
@@ -155,6 +171,12 @@ fn main() {
             .help("Write output to har file")
             .takes_value(true)
         )
+        .arg(clap::Arg::with_name("file_root")
+            .long("file-root")
+            .value_name("DIR")
+            .help("set root filesystem to import file in hurl (default is curent directory)")
+            .takes_value(true)
+        )
         .arg(clap::Arg::with_name("fail_at_end")
             .long("fail-at-end")
             .help("Fail at end")
@@ -223,6 +245,10 @@ fn main() {
     let current_dir_buf = std::env::current_dir().unwrap();
     let current_dir = current_dir_buf.as_path();
 
+    let file_root = match matches.value_of("file_root") {
+        Some(value) => Some(value.to_string()),
+        _ => None
+    };
 
     let verbose = matches.is_present("verbose");
     let insecure = matches.is_present("insecure");
@@ -236,7 +262,17 @@ fn main() {
 
     let mut hurl_results = vec![];
     for filename in filenames {
-        let hurl_result = execute(filename, verbose, insecure, fail_fast, output_color, noproxy_hosts.clone(), &variables, current_dir);
+        let hurl_result = execute(
+            filename,
+            verbose,
+            insecure,
+            fail_fast,
+            output_color,
+            noproxy_hosts.clone(),
+            &variables,
+            current_dir,
+            file_root.clone(),
+        );
         hurl_results.push(hurl_result.clone());
     }
 
