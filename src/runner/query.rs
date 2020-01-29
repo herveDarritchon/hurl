@@ -9,6 +9,8 @@ use super::core::{Error, RunnerError};
 use super::super::core::ast::*;
 use super::xpath;
 
+use regex::Regex;
+
 // QueryResult
 // success => just the value is kept
 // error   => thrown within asserts / logged within Captures
@@ -149,7 +151,29 @@ impl Query {
                         if value == Value::List(vec![]) { Value::None } else { value }
                     }
                 };
-                return Ok(value);
+                Ok(value)
+            }
+            QueryValue::Regex { expr: HurlString { value, source_info, .. }, .. } => {
+                let s = match String::from_utf8(http_response.body) {
+                    Err(_) => return Err(Error { source_info: self.source_info, inner: RunnerError::InvalidUtf8, assert: false }),
+                    Ok(v) => v
+                };
+                match Regex::new(value.as_str()) {
+                    Ok(re) => match re.captures(s.as_str()) {
+                        Some(captures) => match captures.get(1) {
+                            Some(v) => Ok(Value::String(v.as_str().to_string())),
+                            None => Ok(Value::None),
+                        }
+                        None => Ok(Value::None),
+                    }
+                    Err(_) => Err(Error {
+                        source_info,
+                        inner: RunnerError::InvalidRegex(),
+                        assert: false
+                    })
+                }
+
+
             }
         };
     }
@@ -497,3 +521,59 @@ fn test_query_json() {
 
 // endregion
 
+// region test regex
+
+#[cfg(test)]
+pub fn regex_name() -> Query {
+// regex "Hello ([a-zA-Z]+)!"
+    return Query {
+        source_info: SourceInfo::init(1, 1, 1, 26),
+        value: QueryValue::Regex {
+            space0: Whitespace {
+                value: String::from(""),
+                source_info: SourceInfo::init(1, 6, 1, 7),
+            },
+            expr: HurlString {
+                value: String::from("Hello ([a-zA-Z]+)!"),
+                encoded: Some("Hello ([a-zA-Z]+)!".to_string()),
+                source_info: SourceInfo::init(1, 7, 1, 26),
+            },
+        },
+    };
+}
+
+
+#[cfg(test)]
+pub fn regex_invalid() -> Query {
+// regex ???"
+    return Query {
+        source_info: SourceInfo::init(1, 1, 1, 26),
+        value: QueryValue::Regex {
+            space0: Whitespace {
+                value: String::from(""),
+                source_info: SourceInfo::init(1, 6, 1, 7),
+            },
+            expr: HurlString {
+                value: String::from("???"),
+                encoded: None,
+                source_info: SourceInfo::init(1, 7, 1, 10),
+            },
+        },
+    };
+}
+
+
+
+#[test]
+fn test_query_regex() {
+    assert_eq!(
+        regex_name().eval(http::response::hello_http_response()).unwrap(),
+        Value::String("World".to_string())
+    );
+
+    let error = regex_invalid().eval(http::response::hello_http_response()).err().unwrap();
+    assert_eq!(error.source_info, SourceInfo::init(1, 7, 1, 10));
+    assert_eq!(error.inner, RunnerError::InvalidRegex());
+}
+
+// endregion

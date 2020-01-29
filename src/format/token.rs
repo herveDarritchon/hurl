@@ -491,6 +491,11 @@ impl Tokenizable for Query {
                 add_tokens(&mut tokens, space0.tokenize());
                 add_tokens(&mut tokens, expr.tokenize());
             }
+            QueryValue::Regex { space0, expr } => {
+                tokens.push(Token::QueryType(String::from("regex")));
+                add_tokens(&mut tokens, space0.tokenize());
+                add_tokens(&mut tokens, expr.tokenize());
+            }
         }
         return tokens;
     }

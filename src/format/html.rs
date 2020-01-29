@@ -343,6 +343,11 @@ impl Htmlable for QueryValue {
                 buffer.push_str(space0.to_html().as_str());
                 buffer.push_str(expr.to_html().as_str());
             }
+            QueryValue::Regex { space0, expr } => {
+                buffer.push_str("<span class=\"query-type\">regex</span>");
+                buffer.push_str(space0.to_html().as_str());
+                buffer.push_str(expr.to_html().as_str());
+            }
         }
 
         return buffer;

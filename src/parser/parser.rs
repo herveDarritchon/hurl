@@ -1454,6 +1454,7 @@ pub fn query_value(p: &mut Parser) -> ParseResult<'static, QueryValue> {
             body_query,
             xpath_query,
             jsonpath_query,
+            regex_query,
         ],
         p,
     );
@@ -1703,6 +1704,66 @@ pub fn jsonpath_expr(p: &mut Parser) -> ParseResult<'static, HurlString> {
         }
     };
 }
+
+
+pub fn regex_query(p: &mut Parser) -> ParseResult<'static, QueryValue> {
+    try_literal("regex", p)?;
+    let space0 = one_or_more_spaces(p)?;
+    let expr = regex_expr(p)?;
+    return Ok(QueryValue::Regex { space0, expr });
+}
+
+pub fn regex_expr(p: &mut Parser) -> ParseResult<'static, HurlString> {
+    let start = p.state.clone();
+    return match json::json_string2(p) {
+        Ok((value, encoded)) => {
+
+            Ok(HurlString {
+                value,
+                encoded: Some(encoded),
+                source_info: SourceInfo {
+                    start: start.pos,
+                    end: p.clone().state.pos,
+                },
+            })
+        }
+        Err(e) => {
+            if e.recoverable {
+                let value = p.next_chars_while(|c| {
+                    c.is_alphanumeric()
+                        || *c == '-'
+                        || *c == '.'
+                        || *c == '('
+                        || *c == ')'
+                        || *c == '/'
+                        || *c == '$'
+                        || *c == '\\'
+                        || *c == '['
+                        || *c == ']'
+                        || *c == '\''
+                });
+                if value == "" {
+                    return Err(Error {
+                        pos: start.pos,
+                        recoverable: false,
+                        inner: ParseError::RegexExpr {},
+                    });
+                };
+                return Ok(HurlString {
+                    value: value.clone(),
+                    encoded: None,
+                    source_info: SourceInfo {
+                        start: start.pos,
+                        end: p.clone().state.pos,
+                    },
+                });
+            } else {
+                return Err(e);
+            }
+        }
+    };
+}
+
 // endregion
 
 // region predicate

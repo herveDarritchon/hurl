@@ -287,6 +287,10 @@ pub enum QueryValue {
         space0: Whitespace,
         expr: HurlString,
     },
+    Regex {
+        space0: Whitespace,
+        expr: HurlString,
+    },
 }
 impl Query {
     pub fn is_jsonpath(self) -> bool {

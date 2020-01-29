@@ -25,6 +25,7 @@ pub enum ParseError {
     Xml {},
     Predicate,
     PredicateValue,
+    RegexExpr,
 
     Unexpected { character: String },
     Eof {},
@@ -57,7 +58,7 @@ impl FormatError for Error {
             ParseError::Json { .. } => "Parsing json".to_string(),
             ParseError::Predicate { .. } => "Parsing predicate".to_string(),
             ParseError::PredicateValue { .. } => "Parsing predicate value".to_string(),
-
+            ParseError::RegexExpr { .. } => "Parsing regex".to_string(),
             _ => format!("{:?}", self),
         };
     }
@@ -77,6 +78,7 @@ impl FormatError for Error {
             ParseError::Json { .. } => "json error".to_string(),
             ParseError::Predicate { .. } => "expecting a predicate".to_string(),
             ParseError::PredicateValue { .. } => "invalid predicate value".to_string(),
+            ParseError::RegexExpr { .. } => "Invalid Regex expression".to_string(),
 
             _ => format!("{:?}", self),
         };
